@@ -1,6 +1,6 @@
 """Welcome to Pynecone! This file outlines the steps to create a basic app."""
 from pcconfig import config
-
+from typing import List
 import pynecone as pc
 from .helpers import navbar_index
 from .helpers import navbar
@@ -30,10 +30,36 @@ class State(pc.State):
     def signup(self):
         with pc.session() as session:
             user = User(username=self.username, password=self.password)
-            session.add(user)
             session.commit()
+            session.add(user)
         self.logged_in = True
         return pc.redirect("/")
+
+# The images to show.
+    img: List[str]
+
+    async def handle_upload(
+        self, files: List[pc.UploadFile]
+    ):
+        """Handle the upload of file(s).
+
+        Args:
+            files: The uploaded files.
+        """
+        for file in files:
+            upload_data = await file.read()
+            outfile = f".web/public/{file.filename}"
+
+            # Save the file.
+            with open(outfile, "wb") as file_object:
+                file_object.write(upload_data)
+
+            # Update the img var.
+            self.img.append(file.filename)
+
+    def clear_images(self):
+        """Clear the images."""
+        self.img[:] = []  # Réinitialiser la liste sans la vider complètement
 
 
 def index() -> pc.Component:
@@ -63,12 +89,13 @@ def index() -> pc.Component:
                         width="75%",
                         padding_x="1em",
                         font_family="BrunoAceSC",
+                        border_radius="md",
                     ),
                     #padding_x="25em",
                     padding_y="5em",
                     width="80%",
                     ),
-                pc.button(
+                pc.link(pc.button(
                         "TRY IT NOW",
                         border_radius="1em",
                         size="lg",
@@ -80,11 +107,10 @@ def index() -> pc.Component:
                             "opacity": 0.85,
                         },
                         padding_x="5em"
-                ), 
+                ), href="/mlapp", width="100%"),
             width="80%"),
     )
-            
-    
+                
 
 
 
@@ -135,10 +161,41 @@ def signup() -> pc.Component:
             padding_top="10%",
         )
 
+def mlapp() -> pc.Component:
+        return pc.vstack(
+            navbar(),
+        pc.upload(
+            pc.vstack(
+                pc.button(
+                    "Select File",
+                    color="grey",
+                    bg="white",
+                    border=f"1px solid grey",
+                ),
+                pc.text(
+                    "Drag and drop files here or click to select files"
+                ),
+            ),
+            border=f"1px dotted grey",
+            padding="5em",
+        ),
+        pc.button(
+            "Upload",
+            on_click=lambda: State.handle_upload(
+                pc.upload_files()
+            ),
+        ),
+        pc.foreach(
+            State.img, lambda img: pc.image(src=img)
+        ),
+        pc.button("Reload page", on_click=lambda: State.clear_images()),
+        padding="5em",
+    )
 
 
 # Add state and page to the app.
 app = pc.App(state=State)
 app.add_page(index, title="Dish Decoder")
 app.add_page(signup)
+app.add_page(mlapp)
 app.compile()

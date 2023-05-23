@@ -1,1 +1,2 @@
 pynecone==0.1.31
+typing==37.7.4.3

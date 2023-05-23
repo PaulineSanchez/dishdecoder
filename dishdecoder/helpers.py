@@ -37,7 +37,7 @@ def navbar():
             
             spacing="12em",
             padding_x="2em",
-            padding_y="1em",
+            padding_y="0.75em",
             bg="RGB(249, 180, 45)",
         ),
         position="fixed",
