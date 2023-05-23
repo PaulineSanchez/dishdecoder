@@ -47,7 +47,7 @@ def index() -> pc.Component:
             spacing="1.5em",
             font_size="2em",
         ),
-        padding_top="5%",),
+        padding_top="7%",),
         pc.spacer(),
             pc.hstack(
                 pc.box(
@@ -64,8 +64,9 @@ def index() -> pc.Component:
                         padding_x="1em",
                         font_family="BrunoAceSC",
                     ),
-                    padding_x="25em",
+                    #padding_x="25em",
                     padding_y="5em",
+                    width="80%",
                     ),
                 pc.button(
                         "TRY IT NOW",
@@ -78,9 +79,11 @@ def index() -> pc.Component:
                         _hover={
                             "opacity": 0.85,
                         },
-                ),
-            ),
-            )
+                        padding_x="5em"
+                ), 
+            width="80%"),
+    )
+            
     
 
 
