@@ -130,7 +130,7 @@ def signup() -> pc.Component:
                 spacing="1em",
             ),
             padding_top="10%",
-        ),
+        )
 
 
 
