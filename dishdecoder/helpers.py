@@ -30,11 +30,12 @@ def navbar():
             pc.hstack(
                 pc.text("Decode Recipes, Translate Tastes - Dish Decoder!", as_="em"),
                 pc.image(src="/magic-wand.png", width="30px"),
-            ),
+            ), 
             pc.text("Dish Decoder", as_="b", align="center", font_size="2em"),
+            pc.spacer(),
             pc.link(pc.button("Return", bg="RGB(30, 130, 76)", color="white", border_radius="md", px=4, py=2), href="/", width="100%"),   
             
-            justify="space-between",
+            spacing="12em",
             padding_x="2em",
             padding_y="1em",
             bg="RGB(249, 180, 45)",
