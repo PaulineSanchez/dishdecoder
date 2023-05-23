@@ -37,29 +37,52 @@ class State(pc.State):
 
 
 def index() -> pc.Component:
-    return pc.center(
+    return pc.vstack( 
+        pc.center(
         navbar_index(),
         pc.vstack(
             pc.hstack(
             pc.heading("Dish Decoder", font_size="4em", font_family="BrunoAceSC"),
             pc.image(src="/logo.png", fit="heading"), spacing="1em"),
-            pc.box("Get started by editing ", pc.code(filename, font_size="1em")),
-            pc.button("Login", href="/login", color="primary"),
-            pc.link(
-                "Check out our docs!",
-                href=docs_url,
-                border="0.1em solid",
-                padding="0.5em",
-                border_radius="0.5em",
-                _hover={
-                    "color": "rgb(107,99,246)",
-                },
-            ),
             spacing="1.5em",
             font_size="2em",
         ),
-        padding_top="5%",
-    )
+        padding_top="5%",),
+        pc.spacer(),
+            pc.hstack(
+                pc.box(
+                    pc.tabs(
+                        items=[
+                            ("English", pc.list(items=["Welcome to Dish Decoder!", "Dish Decoder is an application where you can perform OCR on a recipe and translate it.", "Not sure what it means ?", "Just try it!"], font_size="2em", spacing=".25em")),
+                            ("Français", pc.list(items=["Bienvenue sur Dish Decoder !", "Dish Decoder est une application où vous pouvez effectuer de l'OCR sur une recette et la traduire.", "Vous ne savez pas ce que cela signifie ?", "Essayez-le tout simplement!"], font_size="2em", spacing=".25em")),
+                        ],
+                        bg="RGB(244, 237, 228)",
+                        color="black",
+                        shadow="lg",
+                        position="left",
+                        width="75%",
+                        padding_x="1em",
+                        font_family="BrunoAceSC",
+                    ),
+                    padding_x="25em",
+                    padding_y="5em",
+                    ),
+                pc.button(
+                        "TRY IT NOW",
+                        border_radius="1em",
+                        size="lg",
+                        box_shadow="rgba(151, 65, 252, 0.8) 0 15px 30px -10px",
+                        background_image="linear-gradient(144deg,#AF40FF,#5B42F3 50%,#00DDEB)",
+                        box_sizing="border-box",
+                        color="white",
+                        _hover={
+                            "opacity": 0.85,
+                        },
+                ),
+            ),
+            )
+    
+
 
 
 def signup() -> pc.Component:
@@ -107,7 +130,7 @@ def signup() -> pc.Component:
                 spacing="1em",
             ),
             padding_top="10%",
-        )
+        ),
 
 
 
