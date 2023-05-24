@@ -1,10 +1,10 @@
 import pynecone as pc
 
-class DishdecoderConfig(pc.Config):
-    pass
-
-config = DishdecoderConfig(
+config = pc.Config(
     app_name="dishdecoder",
     db_url="sqlite:///pynecone.db",
     env=pc.Env.DEV,
+    frontend_packages=[
+        "react-image-crop", "croppr"
+    ],
 )

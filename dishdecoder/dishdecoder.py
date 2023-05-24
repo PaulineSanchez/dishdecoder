@@ -1,6 +1,6 @@
 """Welcome to Pynecone! This file outlines the steps to create a basic app."""
 from pcconfig import config
-from typing import List
+from typing import List, Dict
 import pynecone as pc
 from .helpers import navbar_index
 from .helpers import navbar
@@ -15,11 +15,28 @@ class User(pc.Model, table=True):
     username: str
     password: str
 
+# class CroppedObject(pc.State):
+#     bboxs = {"unit": str, "x": int, "y": int, "width": int, "height": int}
+
+
+# class Crop(pc.Component):
+#     library = "croppr"
+#     tag = "Croppr"
+#     bbox = CroppedObject
+#     is_default = True
+
+#     @classmethod
+#     def get_controlled_triggers(cls) -> Dict[str, pc.Var]:
+#         return {"on_change": pc.EVENT_ARG}
+
+# crop = Crop.create   
+
 class State(pc.State):
     """The app state."""
     
     username: str = ""
     password: str = ""
+    img: List[str]
 
     def set_username(self, username):
         self.username = username.strip()
@@ -34,9 +51,6 @@ class State(pc.State):
             session.add(user)
         self.logged_in = True
         return pc.redirect("/")
-
-# The images to show.
-    img: List[str]
 
     async def handle_upload(
         self, files: List[pc.UploadFile]
@@ -61,10 +75,12 @@ class State(pc.State):
             self.img.append(file.filename)
 
 
-    def clear_images(self):
-        """Clear the images."""
-        #self.img[:] = []  # Réinitialiser la liste sans la vider complètement
-        self.img.clear()
+    # def clear_images(self):
+    #     """Clear the images."""
+    #     #self.img[:] = []  # Réinitialiser la liste sans la vider complètement
+    #     self.img.clear()
+ 
+
 
   
 def index() -> pc.Component:
@@ -99,7 +115,7 @@ def index() -> pc.Component:
                     #padding_x="25em",
                     padding_y="5em",
                     width="80%",
-                    ),
+                ),
                 pc.link(pc.button(
                         "TRY IT NOW",
                         border_radius="1em",
@@ -176,34 +192,83 @@ def mlapp() -> pc.Component:
         The reload button permits you to clear the image displayed.
         The crop button permits you to crop the image.
         """
-        return pc.vstack(
+        return pc.grid(
             navbar(),
-        pc.upload(
-            pc.vstack(
-                pc.button(
-                    "Select File",
-                    color="grey",
-                    bg="white",
-                    border=f"1px solid grey",
+            pc.grid_item(
+                pc.vstack(
+                pc.center(
+                pc.badge("First step", bg="RGB(244, 237, 228)", justify="center"),
                 ),
-                pc.text(
-                    "Drag and drop files here or click to select files"
+                pc.upload(
+                    pc.vstack(
+                        pc.button(
+                            "Select File",
+                            color="white",
+                            bg="RGB(65, 147, 169)",
+                            border=f"1px solid grey",
+                        ),
+                        pc.text(
+                            "Drag and drop files here or click to select files"
+                        ),
+                    ),
+                    border=f"1px dotted grey",
+                    padding="3em",
+                    multiple=False,
+                    max_files=1,
+                    bg="RGB(190, 220, 227)",
+                    border_radius="md",
+                ),
+                pc.spacer(),
+                pc.center(
+
+                    pc.button("Upload", on_click=lambda: State.handle_upload(pc.upload_files()) if pc.upload_files() else None, bg="RGB(162, 222, 208)", color="white"),
+                ),    
+                pc.spacer(),
+                pc.center(
+                pc.foreach(
+                    State.img, lambda img: pc.image(src=img, max_width="600px", max_height="600px")
+                ),
+                ),
+                row_span=2, col_span=1, padding="3em", justify_items="center"
                 ),
             ),
-            border=f"1px dotted grey",
-            padding="5em",
-            multiple=False,
-            max_files=1,
-        ),
-        pc.button(
-            "Upload",
-            on_click=lambda: State.handle_upload(pc.upload_files()) if pc.upload_files() else None,
-        ),
-        pc.foreach(
-            State.img, lambda img: pc.image(src=img)
-        ),
-        pc.button("Reload page", on_click=lambda: State.clear_images()),
-        padding="5em",
+            pc.grid_item(
+                pc.vstack(
+                pc.center(
+                pc.badge("Second step", bg="RGB(244, 237, 228)", justify="center"),
+                ),
+                pc.button("OCR", width="100%", bg="RGB(205, 209, 228)", color="white", size="lg"),
+                row_span=2, col_span=1, padding="3em", justify_items="center"
+                ),
+            ),
+            pc.grid_item(
+                pc.vstack(
+                pc.center(
+                pc.badge("Third step", bg="RGB(244, 237, 228)", justify="center"),
+                ),
+                pc.button("Translate", width="100%", bg="RGB(227, 218, 231)", color="white", size="lg"),
+                row_span=2, col_span=1, padding="3em", justify_items="center"
+                ),
+            ),
+            template_rows="repeat(2, 1fr)",
+            template_columns="repeat(3, 1fr)",
+            h="200px",
+            width="100%",
+            gap=4,
+            padding_top="3%",
+
+
+        # pc.button("Clear image", on_click=lambda: State.clear_images()),
+        # ),
+        # pc.vstack(
+        #     pc.heading("Crop the image", font_size="2em"),
+        #     crop(on_change=CroppedObject.set_bboxs),
+        #     background_color="pink",
+        #     padding="5em",
+        #     border_radius="1em",
+        # ),
+        
+
     )
        
                
