@@ -54,14 +54,19 @@ class State(pc.State):
             with open(outfile, "wb") as file_object:
                 file_object.write(upload_data)
 
+            # Clear the images.
+            self.img.clear()
+
             # Update the img var.
             self.img.append(file.filename)
 
+
     def clear_images(self):
         """Clear the images."""
-        self.img[:] = []  # Réinitialiser la liste sans la vider complètement
+        #self.img[:] = []  # Réinitialiser la liste sans la vider complètement
+        self.img.clear()
 
-
+  
 def index() -> pc.Component:
     return pc.vstack( 
         pc.center(
@@ -162,6 +167,15 @@ def signup() -> pc.Component:
         )
 
 def mlapp() -> pc.Component:
+        """
+        mlapp() permits you to select a file, upload it and display it.
+        The upload button only appears when a file is selected through the select file button.
+        Once the select file button is clicked, a file explorer appears.
+        A text is displayed when a file is selected : "1 file selected".
+        When the upload button is clicked, the file is uploaded and displayed.
+        The reload button permits you to clear the image displayed.
+        The crop button permits you to crop the image.
+        """
         return pc.vstack(
             navbar(),
         pc.upload(
@@ -178,12 +192,12 @@ def mlapp() -> pc.Component:
             ),
             border=f"1px dotted grey",
             padding="5em",
+            multiple=False,
+            max_files=1,
         ),
         pc.button(
             "Upload",
-            on_click=lambda: State.handle_upload(
-                pc.upload_files()
-            ),
+            on_click=lambda: State.handle_upload(pc.upload_files()) if pc.upload_files() else None,
         ),
         pc.foreach(
             State.img, lambda img: pc.image(src=img)
@@ -191,6 +205,9 @@ def mlapp() -> pc.Component:
         pc.button("Reload page", on_click=lambda: State.clear_images()),
         padding="5em",
     )
+       
+               
+
 
 
 # Add state and page to the app.
