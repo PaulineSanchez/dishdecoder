@@ -23,7 +23,10 @@ st.header("_Decode Recipes, Translate Tastes - Dish Decoder!_")
 st.markdown("###")
 st.markdown("###")
 
-def api_ocr(image:Image.Image):
+def api_ocr(image: Image.Image, source_lang: str, target_lang: str):
+    """
+    Call the OCR API to perform OCR on the image and translate it from the source language to the target language.
+    """
     if isinstance(image, Image.Image):
         # convert as bytes
         img_byte_arr = io.BytesIO()
@@ -32,9 +35,10 @@ def api_ocr(image:Image.Image):
 
     url = "http://localhost:7680/inference"
     files = {'file': img_byte_arr}
-    data = {'source_lang': 'en', 'target_lang': 'fr'}
+    data = {'source_lang': source_lang, 'target_lang': target_lang}
     response = requests.post(url, files=files, data=data)
     return response
+
 
 
 
@@ -118,19 +122,38 @@ cropped_img = cropped_img
 
 with col_translation:
     st.markdown("3. Let's ocr and translate that fabulous recipe...")
+    option = st.radio("Translation Option:", ["Translate from French to English", "Translate from English to French"])
     translatecheck = st.checkbox("OCR and translate that recipe!", value=False, key="translatecheck")   
 
     if translatecheck:
-        if cropped_img is not None:
-            response = api_ocr(cropped_img)
+        if option == "Translate from French to English":
 
-            if response.status_code == 200:
-                image_data = response.content
-                st.image(image_data, caption='Here is the translated recipe', use_column_width=True)
+            if cropped_img is not None:
+                response = api_ocr(cropped_img, "fr", "en")
+
+                if response.status_code == 200:
+                    image_data = response.content
+                    st.image(image_data, caption='Here is the translated recipe', use_column_width=True)
+                else:
+                    st.warning("OCR and translation failed. Please try again.")
             else:
-                st.warning("OCR and translation failed. Please try again.")
-        else:
-            st.warning("Please crop the image before OCR and translation.")
+                st.warning("Please crop the image before OCR and translation.")
+    
+    if translatecheck:
+        if option == "Translate from English to French":
+            
+            if cropped_img is not None:
+                response = api_ocr(cropped_img, "en", "fr")
+    
+                if response.status_code == 200:
+                    image_data = response.content
+                    st.image(image_data, caption='Here is the translated recipe', use_column_width=True)
+                else:
+                    st.warning("OCR and translation failed. Please try again.")
+            else:
+                st.warning("Please crop the image before OCR and translation.")
+
+   
 
 
 
