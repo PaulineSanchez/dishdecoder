@@ -2,11 +2,16 @@ import math
 from typing import List, Tuple, Union
 
 import numpy as np
+import openai
 from paddleocr import PaddleOCR
 from PIL import Image, ImageDraw, ImageFont
 from transformers import pipeline
 
 from config import settings
+
+
+openai.api_key = settings.api_key
+
 
 class Service:
     def __init__(self) -> None:
@@ -31,6 +36,9 @@ class Service:
             device=settings.device,
         )
 
+        self.prompt_en = "Correct the following recipe or list of ingredients without adding anything upstream to explain to me what you are doing and without digressing from the original text, do not inform me if you do any change:\n{sentence}" 
+        self.prompt_fr = "Corrige la recette ou la liste d'ingérdients suivante sans rien ajouter en amont pour m'expliquer ce que tu fais et sans faire de disgression par rapport au texte original, ne me dis rien si tu fais le moindre changement:\n{sentence}"
+
     def inference(self, image:Image.Image, source_lang: str, target_lang: str) -> Image.Image:
         """
         Inference lance le processus de traduction du texte sur une image.
@@ -45,9 +53,18 @@ class Service:
         """
         ocr_results = self.do_ocr(image)
         ocr_texts = [line[1][0] for line in ocr_results]
+        concatenated_ocr_texts = " ".join(ocr_texts)
+        print(concatenated_ocr_texts)
+        print("====================================")
         # ocr_confidence = [line[1][1] for line in ocr_results]
+        input_sentence = concatenated_ocr_texts
+        corrected_sentence = self.do_correct_sentence(input_sentence, source_lang)
+        print(corrected_sentence)
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         ocr_bbox = [line[0] for line in ocr_results]
         translated_texts = self.do_translation(ocr_texts, source_lang, target_lang)
+        translated_paragraph = self.do_translation(corrected_sentence, source_lang, target_lang)
+        print(translated_paragraph)
         post_processed_image = self.do_post_processing(image, ocr_bbox, translated_texts)
         return post_processed_image
         
@@ -64,7 +81,20 @@ class Service:
         pix = np.array(image.convert('RGB'))
         result_base = self.ocr_model.ocr(pix)
         
+        print(result_base[0])
         return result_base[0]
+    
+    def do_correct_sentence(self, sentence:str, source_lang: str):
+        if source_lang == "en":
+            prompt= self.prompt_en.format(sentence=sentence)
+        if source_lang == "fr":
+            prompt= self.prompt_fr.format(sentence=sentence)    
+        completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo", 
+        messages=[{"role": "user", "content": prompt}]
+        )
+
+        return (completion['choices'][0]['message']['content'])    
 
     def do_translation(self, ocr_texts: List[str], source_lang: str, target_lang: str) -> List[str]:
         """
@@ -90,6 +120,8 @@ class Service:
             raise ValueError("Source language must be either 'en' or 'fr'")
         
         return [line["translation_text"] for line in translated_texts]
+    
+
 
     def do_post_processing(self, image: Image.Image, bboxes: List[List[float]], translated_texts: List[str]) -> Image.Image:
         """
@@ -134,3 +166,5 @@ class Service:
 
             
         return image
+    
+ 
