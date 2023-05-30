@@ -1,4 +1,6 @@
+import json
 import math
+import textwrap
 from typing import List, Tuple, Union
 
 import numpy as np
@@ -26,18 +28,18 @@ class Service:
         self.en_to_fr = pipeline(
             model=settings.en_to_fr_model_path, 
             tokenizer=settings.en_to_fr_model_path, 
-            task="translation",
+            task="translation_en_to_fr",
             device=settings.device,
         )
         self.fr_to_en = pipeline(
             model=settings.fr_to_en_model_path, 
             tokenizer=settings.fr_to_en_model_path, 
-            task="translation",
+            task="translation_fr_to_en",
             device=settings.device,
         )
 
-        self.prompt_en = "Correct the following recipe or list of ingredients without adding anything upstream to explain to me what you are doing and without digressing from the original text, do not inform me if you do any change:\n{sentence}" 
-        self.prompt_fr = "Corrige la recette ou la liste d'ingérdients suivante sans rien ajouter en amont pour m'expliquer ce que tu fais et sans faire de disgression par rapport au texte original, ne me dis rien si tu fais le moindre changement:\n{sentence}"
+        self.prompt_en = "Correct only the grammar and the orthograph of the following recipe or list of ingredients without digressing from the original text, you only need to define each step well, don't add things that aren't present in the original text, never add any text to explain what you are doing:\n{sentence}"
+        self.prompt_fr = "Corrige seulement la grammaire et l'orthographe de la recette ou la liste d'ingérdients suivante sans faire de disgression par rapport au texte original, il faut seulement que chaque étape soit bien définie, n'ajoute rien qui ne soit pas présent dans le texte de base, ne jamais ajouter de texte pour expliquer ce que tu fais:\n{sentence}"
 
     def inference(self, image:Image.Image, source_lang: str, target_lang: str) -> Image.Image:
         """
@@ -49,23 +51,26 @@ class Service:
             target_lang (str): Langue cible (après traduction)
         
         Returns:
-            Image.Image: Image de base avec le texte traduit
+            Image.Image: Image avec le texte traduit
         """
         ocr_results = self.do_ocr(image)
         ocr_texts = [line[1][0] for line in ocr_results]
         concatenated_ocr_texts = " ".join(ocr_texts)
-        print(concatenated_ocr_texts)
-        print("====================================")
+        
         # ocr_confidence = [line[1][1] for line in ocr_results]
         input_sentence = concatenated_ocr_texts
-        corrected_sentence = self.do_correct_sentence(input_sentence, source_lang)
-        print(corrected_sentence)
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        ocr_bbox = [line[0] for line in ocr_results]
-        translated_texts = self.do_translation(ocr_texts, source_lang, target_lang)
-        translated_paragraph = self.do_translation(corrected_sentence, source_lang, target_lang)
+        corrected_sentences = self.do_correct_text(input_sentence, source_lang)
+        print(corrected_sentences)
+       
+        corrected_sentences_splitted = corrected_sentences.split("\n")
+
+        # ocr_bbox = [line[0] for line in ocr_results]
+        # translated_texts = self.do_translation(ocr_texts, source_lang, target_lang)
+        translated_paragraph = self.do_translation(corrected_sentences_splitted, source_lang, target_lang)
         print(translated_paragraph)
-        post_processed_image = self.do_post_processing(image, ocr_bbox, translated_texts)
+        print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
+        
+        post_processed_image = self.do_post_processing_for_paragraphs(translated_paragraph)
         return post_processed_image
         
     def do_ocr(self, image:Image.Image) -> List[List[Union[List[List[float]], Tuple[str, float]]]]:
@@ -84,14 +89,25 @@ class Service:
         print(result_base[0])
         return result_base[0]
     
-    def do_correct_sentence(self, sentence:str, source_lang: str):
+    def do_correct_text(self, sentence:str, source_lang: str):
+        """
+        Do correct text lance le modèle de correction orthographique et grammaticale sur le texte.
+
+        Args:
+            sentence (str): Phrase à corriger
+            source_lang (str): Langue source (avant traduction)
+
+        Returns:
+            str: Phrase corrigée
+        """
         if source_lang == "en":
             prompt= self.prompt_en.format(sentence=sentence)
         if source_lang == "fr":
             prompt= self.prompt_fr.format(sentence=sentence)    
         completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo", 
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.1,
         )
 
         return (completion['choices'][0]['message']['content'])    
@@ -123,48 +139,76 @@ class Service:
     
 
 
-    def do_post_processing(self, image: Image.Image, bboxes: List[List[float]], translated_texts: List[str]) -> Image.Image:
+    # def do_post_processing(self, image: Image.Image, bboxes: List[List[float]], translated_texts: List[str]) -> Image.Image:
+    #     """
+    #     Do post processing applique des rectangles opaques sur les coordonnées des bbox et les textes traduits sur l'image de base.
+
+    #     Args:
+    #         image (Image.Image): Image de base
+    #         bboxes (List[List[float]]): Liste de listes de coordonnées des bbox
+    #         translated_texts (List[str]): Liste de textes traduits
+
+    #     Returns:
+    #         Image.Image: Image de base avec les rectangles et les textes traduits
+    #     """
+        
+    #     draw = ImageDraw.Draw(image)
+    #     font = ImageFont.truetype(settings.font_path, 14)
+
+    #     for bbox, text in zip(bboxes, translated_texts):
+    #         x, y = bbox[0][0], bbox[0][1]
+
+    #         bbox = [tuple(point) for point in bbox]
+    #         draw.polygon(bbox, fill="white")
+            
+    #         dx = bbox[1][0] - bbox[0][0]
+    #         dy = bbox[1][1] - bbox[0][1]
+    #         angle = math.degrees(math.atan2(dy, dx))
+
+    #         center_point = ((x + bbox[2][0]) // 2, (y + bbox[2][1]) // 2)
+
+    #         rotated_img = image.rotate(angle, center=center_point, resample=Image.BICUBIC, expand=True)
+
+    #         text_img = Image.new("RGBA", rotated_img.size, (0, 0, 0, 0))
+    #         text_draw = ImageDraw.Draw(text_img)
+
+    #         rotated_position = (center_point[0] - font.getsize(text)[0] // 2, center_point[1] - font.getsize(text)[1] // 2)
+    #         text_draw.text(rotated_position, text, font=font, fill="black")
+
+    #         text_img = text_img.rotate(-angle, center=center_point, resample=Image.BICUBIC)
+
+
+    #         image.paste(text_img, mask=text_img)
+
+            
+    #     return image
+    
+    def do_post_processing_for_paragraphs(self, translated_paragraphs: list()) -> Image.Image:
         """
-        Do post processing applique des rectangles opaques sur les coordonnées des bbox et les textes traduits sur l'image de base.
+        Do post processing paragraphs applique un rectangle opaque sur une image de taille 600*600 et écrit les paragraphes traduits sur l'image.
+        Chaque string de la liste translated_paragraphs correspond à une ligne de texte.
+        Si le texte est trop long, il est coupé en plusieurs lignes grâce à la fonction textwrap.wrap.
 
         Args:
             image (Image.Image): Image de base
-            bboxes (List[List[float]]): Liste de listes de coordonnées des bbox
-            translated_texts (List[str]): Liste de textes traduits
-
+            translated_paragraphs (List[str]): Liste de paragraphes traduits
+        
         Returns:
-            Image.Image: Image de base avec les rectangles et les textes traduits
+            Image.Image: Image de base avec le rectangle et les paragraphes traduits
         """
         
+        image = Image.new("RGBA", (600, 600), (0, 0, 0, 0))
         draw = ImageDraw.Draw(image)
         font = ImageFont.truetype(settings.font_path, 14)
 
-        for bbox, text in zip(bboxes, translated_texts):
-            x, y = bbox[0][0], bbox[0][1]
+        # On crée un rectangle opaque sur toute la surface de l'image
+        draw.rectangle([(0, 0), image.size], fill="white")
 
-            bbox = [tuple(point) for point in bbox]
-            draw.polygon(bbox, fill="white")
-            
-            dx = bbox[1][0] - bbox[0][0]
-            dy = bbox[1][1] - bbox[0][1]
-            angle = math.degrees(math.atan2(dy, dx))
+        # On écrit les paragraphes traduits sur l'image
+        for i, paragraph in enumerate(translated_paragraphs):
+            x, y = 0, i*20
+            text = "\n".join(textwrap.wrap(paragraph, width=100))
+            draw.text((x, y), text, font=font, fill="black")
 
-            center_point = ((x + bbox[2][0]) // 2, (y + bbox[2][1]) // 2)
-
-            rotated_img = image.rotate(angle, center=center_point, resample=Image.BICUBIC, expand=True)
-
-            text_img = Image.new("RGBA", rotated_img.size, (0, 0, 0, 0))
-            text_draw = ImageDraw.Draw(text_img)
-
-            rotated_position = (center_point[0] - font.getsize(text)[0] // 2, center_point[1] - font.getsize(text)[1] // 2)
-            text_draw.text(rotated_position, text, font=font, fill="black")
-
-            text_img = text_img.rotate(-angle, center=center_point, resample=Image.BICUBIC)
-
-
-            image.paste(text_img, mask=text_img)
-
-            
         return image
-    
- 
+   
