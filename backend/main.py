@@ -1,4 +1,5 @@
 import io
+from pathlib import Path
 from PIL import Image
 
 from fastapi import FastAPI, File, Form, UploadFile
@@ -37,11 +38,11 @@ def inference(
 
     with io.BytesIO() as output:
         result.save(output, format="PNG")
-        contents = output.getvalue()
+        contents = output.getvalue() 
 
-    return Response(content=contents, media_type="image/png")
+    return Response(contents, media_type="image/png")
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=7680, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=7680)
