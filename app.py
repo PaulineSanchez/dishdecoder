@@ -122,11 +122,11 @@ cropped_img = cropped_img
 
 with col_translation:
     st.markdown("3. Let's ocr and translate that fabulous recipe...")
-    option = st.radio("Translation Option:", ["Translate from French to English", "Translate from English to French"])
+    option = st.radio("Translation Option:", ["🇫🇷 ➡️ 🇬🇧 (French to English)", "🇬🇧 ➡️ 🇫🇷 (English to French)"])
     translatecheck = st.checkbox("OCR and translate that recipe!", value=False, key="translatecheck")   
 
     if translatecheck:
-        if option == "Translate from French to English":
+        if option == "🇫🇷 ➡️ 🇬🇧 (French to English)":
 
             if cropped_img is not None:
                 response = api_ocr(cropped_img, "fr", "en")
@@ -140,7 +140,7 @@ with col_translation:
                 st.warning("Please crop the image before OCR and translation.")
     
     if translatecheck:
-        if option == "Translate from English to French":
+        if option == "🇬🇧 ➡️ 🇫🇷 (English to French)":
             
             if cropped_img is not None:
                 response = api_ocr(cropped_img, "en", "fr")
