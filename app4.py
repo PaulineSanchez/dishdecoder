@@ -1,5 +1,8 @@
+import pandas as pd
 import streamlit as st
 import sqlite3
+
+from datetime import datetime
 
 # Connexion à la base de données SQLite
 connection = sqlite3.connect("database.db")
@@ -25,12 +28,12 @@ with connection:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             url TEXT NOT NULL,
             description TEXT NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             user_id INTEGER NOT NULL,
             FOREIGN KEY (user_id) REFERENCES user (id)
         )
         """
     )
-
 
 def create_user():
     st.subheader("Créer un utilisateur")
@@ -41,6 +44,11 @@ def create_user():
     password = st.text_input("Mot de passe", type="password", key="e")
 
     if st.button("Créer"):
+        # Vérification des champs vides
+        if not username or not email or not password:
+            st.error("Veuillez remplir tous les champs d'entrée")
+            return
+
         # Ajout de l'utilisateur à la base de données
         with connection:
             cursor = connection.cursor()
@@ -52,8 +60,15 @@ def create_user():
 
         st.success("Utilisateur créé avec succès")
 
+# Ajouter verificateur d'email > qu'il y ait bien un @
+# Ajouter que le nom d'utilisateur n'existe pas déjà
+
 
 def login():
+    
+    link_data = []
+    updated_link_data= []
+
     if 'logged_in' not in st.session_state:
         st.session_state.logged_in = False
 
@@ -85,7 +100,7 @@ def login():
         # Récupérer les liens associés à l'utilisateur depuis la base de données
         with connection:
             cursor = connection.cursor()
-            cursor.execute("SELECT link.url, link.description FROM link JOIN user ON link.user_id = user.id WHERE user.username = ?", (st.session_state.username,))
+            cursor.execute("SELECT link.url, link.description, link.timestamp FROM link JOIN user ON link.user_id = user.id WHERE user.username = ?", (st.session_state.username,))
             links = cursor.fetchall()
 
         # Liste des liens (dans l'ordre inverse)
@@ -97,7 +112,13 @@ def login():
             for link in all_links:
                 url = link[0]
                 description = link[1]
-                st.write("URL :", url, "Description :", description)
+                timestamp = link[2]
+                link_data.append({'URL': url, 'Description': description, 'Timestamp': timestamp})
+                
+            df = pd.DataFrame(link_data)
+            st.subheader("Liens dans un DataFrame")
+            st.dataframe(df)
+
         else:
             st.info("Aucun lien sauvegardé")
 
@@ -106,19 +127,20 @@ def login():
         url = st.text_input("URL", key="aa")
         description = st.text_input("description", key="describe")
         if st.button("Ajouter le lien"):
-            # Ajout du lien à la base de données associé à l'utilisateur
+            # Ajout du lien à la base de données associée à l'utilisateur
             with connection:
                 cursor = connection.cursor()
+                current_timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
                 cursor.execute(
-                    "INSERT INTO link (url, description, user_id) VALUES (?, ?, ?)",
-                    (url, description, st.session_state.user_id),
+                    "INSERT INTO link (url, description, timestamp, user_id) VALUES (?, ?, ?, ?)",
+                    (url, description, current_timestamp, st.session_state.user_id),
                 )
                 connection.commit()
 
             # Récupérer les liens mis à jour depuis la base de données
             with connection:
                 cursor = connection.cursor()
-                cursor.execute("SELECT link.url, link.description FROM link JOIN user ON link.user_id = user.id WHERE user.username = ?", (st.session_state.username,))
+                cursor.execute("SELECT link.url, link.description, link.timestamp FROM link JOIN user ON link.user_id = user.id WHERE user.username = ?", (st.session_state.username,))
                 links = cursor.fetchall()
 
             # Liste des liens (dans l'ordre inverse)
@@ -130,11 +152,14 @@ def login():
                 for link in all_links:
                     url = link[0]
                     description = link[1]
-                    st.write("URL :", url, "Description :", description)
+                    timestamp = link[2]
+                    updated_link_data.append({"URL": url, "Description": description, "Timestamp": timestamp})
+                    
+                df_updated = pd.DataFrame(updated_link_data)
+                st.dataframe(df_updated)
+                
             else:
                 st.info("Aucun lien sauvegardé")
-
-
 
 
 # Titre de l'application
