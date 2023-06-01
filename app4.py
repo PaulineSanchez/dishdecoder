@@ -24,6 +24,7 @@ with connection:
         CREATE TABLE IF NOT EXISTS link (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             url TEXT NOT NULL,
+            description TEXT NOT NULL,
             user_id INTEGER NOT NULL,
             FOREIGN KEY (user_id) REFERENCES user (id)
         )
@@ -84,42 +85,56 @@ def login():
         # Récupérer les liens associés à l'utilisateur depuis la base de données
         with connection:
             cursor = connection.cursor()
-            cursor.execute("SELECT link.url FROM link JOIN user ON link.user_id = user.id WHERE user.username = ?", (st.session_state.username,))
+            cursor.execute("SELECT link.url, link.description FROM link JOIN user ON link.user_id = user.id WHERE user.username = ?", (st.session_state.username,))
             links = cursor.fetchall()
 
         # Liste des liens (dans l'ordre inverse)
-        all_links = [link[0] for link in links[::-1]]
+        all_links = links[::-1]
 
         # Afficher les liens
         if all_links:
             st.subheader("Liens sauvegardés")
             for link in all_links:
-                st.write(link)
+                url = link[0]
+                description = link[1]
+                st.write("URL :", url, "Description :", description)
         else:
             st.info("Aucun lien sauvegardé")
 
         # Formulaire pour ajouter un lien
         st.subheader("Ajouter un lien")
         url = st.text_input("URL", key="aa")
+        description = st.text_input("description", key="describe")
         if st.button("Ajouter le lien"):
             # Ajout du lien à la base de données associé à l'utilisateur
             with connection:
                 cursor = connection.cursor()
                 cursor.execute(
-                    "INSERT INTO link (url, user_id) VALUES (?, ?)",
-                    (url, st.session_state.user_id),
+                    "INSERT INTO link (url, description, user_id) VALUES (?, ?, ?)",
+                    (url, description, st.session_state.user_id),
                 )
                 connection.commit()
 
-            # Mettre à jour la liste des liens avec le nouveau lien ajouté
-            all_links.insert(0, url)
+            # Récupérer les liens mis à jour depuis la base de données
+            with connection:
+                cursor = connection.cursor()
+                cursor.execute("SELECT link.url, link.description FROM link JOIN user ON link.user_id = user.id WHERE user.username = ?", (st.session_state.username,))
+                links = cursor.fetchall()
 
-            st.success("Lien ajouté avec succès")
+            # Liste des liens (dans l'ordre inverse)
+            all_links = links[::-1]
 
             # Afficher les liens mis à jour
-            st.subheader("Liens sauvegardés")
-            for link in all_links:
-                st.write(link)
+            if all_links:
+                st.subheader("Liens sauvegardés mis à jour")
+                for link in all_links:
+                    url = link[0]
+                    description = link[1]
+                    st.write("URL :", url, "Description :", description)
+            else:
+                st.info("Aucun lien sauvegardé")
+
+
 
 
 # Titre de l'application
