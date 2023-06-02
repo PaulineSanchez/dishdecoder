@@ -4,6 +4,8 @@ import pandas as pd
 from PIL import Image, UnidentifiedImageError
 import io
 
+import cloudinary
+import cloudinary.uploader
 from st_btn_select import st_btn_select
 import streamlit as st
 from streamlit_cropper import st_cropper
@@ -38,9 +40,13 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("Dish Decoder 🍲")
-st.header("_Welcome {} ! Decode Recipes, Translate Tastes - Dish Decoder!_".format(st.session_state.username))
+st.session_state["ocr_response"] = None if "ocr_response" not in st.session_state else st.session_state["ocr_response"]
+st.session_state["username"] = None if "username" not in st.session_state else st.session_state["username"]
+st.session_state["logged_in"] = False if "logged_in" not in st.session_state else st.session_state["logged_in"]
+st.session_state["history"] = [] if "history" not in st.session_state else st.session_state["history"]
 
+st.title("Dish Decoder 🍲")
+st.header("_Welcome {} ! Decode Recipes, Translate Tastes - Dish Decoder!_".format(st.session_state["username"]))
 
 st.markdown("###")
 st.markdown("###")
@@ -65,6 +71,46 @@ def api_ocr(image: Image.Image, source_lang: str, target_lang: str):
     return response
 
 
+def api_img2cloud(image: Image.Image):
+    """
+    Call the Img2cloud API to upload the image to Cloudinary.
+    """
+    if isinstance(image, Image.Image):
+        # convert as bytes
+        img_byte_arr2 = io.BytesIO()
+        image.save(img_byte_arr2, format='PNG')
+        img_byte_arr2 = img_byte_arr2.getvalue()
+
+    else:
+        img_byte_arr2 = image
+
+    url = "http://localhost:7680/img2cloud"
+    files = {'file': img_byte_arr2}
+    response = requests.post(url, files=files)
+    return response
+
+def get_history():
+    """
+    Get the history of translations from the database.
+    """
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute("SELECT link.url, link.description, link.timestamp FROM link JOIN user ON link.user_id = user.id WHERE user.username = ?", (st.session_state.username,))
+        links = cursor.fetchall()
+
+        # Liste des liens (dans l'ordre inverse)
+        all_links = links[::-1]
+
+        # Afficher les liens
+        if all_links:
+            st.session_state["history"] = []
+            for link in all_links:
+                url = link[0]
+                description = link[1]
+                timestamp = link[2]
+                st.session_state["history"].append({'URL': url, 'Describe': description, 'Timestamp': timestamp})
+
+
 cropped_img = None
 user_image = None
 
@@ -72,30 +118,14 @@ user_image = None
 tab_history, tab_decode = st.tabs(["History", "Decode"])
 
 with tab_history:
-    with connection:
-        cursor = connection.cursor()
-        cursor.execute("SELECT link.url, link.description, link.timestamp FROM link JOIN user ON link.user_id = user.id WHERE user.username = ?", (st.session_state.username,))
-        links = cursor.fetchall()
-
-        link_data = []
-
-        # Liste des liens (dans l'ordre inverse)
-        all_links = links[::-1]
-
-        # Afficher les liens
-        if all_links:
-            st.subheader("Saved recipes")
-            for link in all_links:
-                url = link[0]
-                description = link[1]
-                timestamp = link[2]
-                link_data.append({'URL': url, 'Describe': description, 'Timestamp': timestamp})
-                
-            df = pd.DataFrame(link_data)
-            st.dataframe(df)
-
-        else:
-            st.info("Aucun lien sauvegardé")
+    get_history()
+    if st.button("Refresh :recycle:"):
+        get_history()
+    if st.session_state["history"]:   
+        st.subheader("Saved recipes")
+        st.dataframe(pd.DataFrame(st.session_state["history"]))
+    else:
+        st.info("Aucun lien sauvegardé")
 
 
 with tab_decode:
@@ -154,42 +184,47 @@ with tab_decode:
     with col_translation:
         st.markdown("3. Let's ocr and translate that fabulous recipe...")
         option = st.radio("Translation Option:", ["🇫🇷 ➡️ 🇬🇧 (French to English)", "🇬🇧 ➡️ 🇫🇷 (English to French)"])
-        translatecheck = st.checkbox("OCR and translate that recipe!", value=False, key="translatecheck")   
+        translatecheck = st.button("OCR and translate that recipe!", key="translatecheck")   
 
         if translatecheck:
             if option == "🇫🇷 ➡️ 🇬🇧 (French to English)":
+                source_lang = "fr"
+                target_lang = "en"
+            elif option == "🇬🇧 ➡️ 🇫🇷 (English to French)":
+                source_lang = "en"
+                target_lang = "fr"
 
-                if cropped_img is not None:
-                    response = api_ocr(cropped_img, "fr", "en")
-
-                    if response.status_code == 200:
-                        image_data = response.content
-                        st.image(image_data, caption='Here is the translated recipe', use_column_width=True)
-                    else:
-                        st.warning("OCR and translation failed. Please try again.")
+            if cropped_img is not None:
+                r = api_ocr(cropped_img, source_lang, target_lang)
+                if r.status_code == 200:
+                    st.session_state["ocr_response"] = r.content
                 else:
-                    st.warning("Please crop the image before OCR and translation.")
-        
-        if translatecheck:
-            if option == "🇬🇧 ➡️ 🇫🇷 (English to French)":
-                
-                if cropped_img is not None:
-                    response = api_ocr(cropped_img, "en", "fr")
-        
-                    if response.status_code == 200:
-                        image_data = response.content
-                        st.image(image_data, caption='Here is the translated recipe', use_column_width=True)
-                    else:
-                        st.warning("OCR and translation failed. Please try again.")
+                    st.error("An error occured during the OCR process")
+            else:
+                st.warning("Please crop the image before OCR and translation.")
+
+        if st.session_state["ocr_response"] is not None:
+            st.image(st.session_state["ocr_response"], caption='Here is the translated recipe', use_column_width=True)
+            description = st.text_input("description", key="describe")
+            send_to_cloud = st.button("Save this recipe to your history", key="send_to_cloud")
+
+            if send_to_cloud:
+                if description is not None and description != "":
+                    r = api_img2cloud(st.session_state["ocr_response"])
+                    received_url = r.text
+                    with connection:
+                        cursor = connection.cursor()
+                        current_timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+                        cursor.execute(
+                            "INSERT INTO link (url, description, timestamp, user_id) VALUES (?, ?, ?, ?)",
+                            (received_url, description, current_timestamp, st.session_state.user_id),
+                        )
+                        connection.commit()
+                    st.success("Recipe saved to your history !")
                 else:
-                    st.warning("Please crop the image before OCR and translation.")
+                    st.error("Please enter a description")
 
 
 
-
-
-
-
-
-if st.button("Go back to home page"):
+if st.button("Go back to home page") or not st.session_state["logged_in"]:
     switch_page("dishdecoder_app")

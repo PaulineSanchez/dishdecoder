@@ -42,6 +42,21 @@ def inference(
 
     return Response(contents, media_type="image/png")
 
+@app.post("/img2cloud", status_code=200, tags=["img2cloud"])
+def img2cloud(
+    file: UploadFile = File(...),
+):
+    """
+    Img2cloud télécharge une image sur Cloudinary.
+
+    Args:
+        file (UploadFile): Fichier image à télécharger
+    """
+    image = Image.open(io.BytesIO(file.file.read()))
+    result = service.image_to_cloud(image)
+
+    return Response(result)
+
 if __name__ == "__main__":
     import uvicorn
 

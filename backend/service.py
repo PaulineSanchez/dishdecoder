@@ -2,7 +2,10 @@ import json
 import math
 import textwrap
 from typing import List, Tuple, Union
+from io import BytesIO
 
+import cloudinary
+import cloudinary.uploader
 import numpy as np
 import openai
 from paddleocr import PaddleOCR
@@ -14,6 +17,11 @@ from config import settings
 
 openai.api_key = settings.api_key
 
+cloudinary.config(
+    cloud_name=settings.cloud_name,
+    api_key=settings.cloud_api_key,
+    api_secret=settings.cloud_api_secret,
+)
 
 class Service:
     def __init__(self) -> None:
@@ -59,9 +67,14 @@ class Service:
         
         # ocr_confidence = [line[1][1] for line in ocr_results]
         input_sentence = concatenated_ocr_texts
-        corrected_sentences = self.do_correct_text(input_sentence, source_lang)
-        print(corrected_sentences)
-       
+        try:
+            corrected_sentences = self.do_correct_text(input_sentence, source_lang)
+            print(corrected_sentences)
+        except openai.error.RateLimitError as e:
+            print(e)
+            corrected_sentences = input_sentence
+            
+
         corrected_sentences_splitted = corrected_sentences.split("\n")
 
         # ocr_bbox = [line[0] for line in ocr_results]
@@ -212,3 +225,22 @@ class Service:
 
         return image
    
+    def image_to_cloud(self, image: Image.Image) -> str:
+        """
+        Image to cloud envoie l'image sur Cloudinary et retourne l'url de l'image.
+
+        Args:
+            image (Image.Image): Image à envoyer sur le cloud
+        
+        Returns:
+            str: Url de l'image sur le cloud
+        """
+
+        image_bytes = BytesIO()
+        image.save(image_bytes, format="PNG")
+        image_bytes.seek(0)
+
+        response = cloudinary.uploader.upload(image_bytes)
+        image_url = response["secure_url"]
+
+        return image_url

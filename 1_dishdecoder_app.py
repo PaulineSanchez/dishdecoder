@@ -38,6 +38,8 @@ st.markdown(
 
 st.markdown('#')
 
+st.session_state["logged_in"] = False if "logged_in" not in st.session_state else st.session_state["logged_in"]
+
 st.title("Dish Decoder 🍲")
 st.header("_Decode Recipes, Translate Tastes - Dish Decoder!_")
 
