@@ -2,3 +2,7 @@ pynecone==0.1.31
 typing==37.7.4.3
 streamlit==1.22.0
 streamlit-cropper==0.2.1
+streamlit-extras==0.2.7
+streamlit st_btn_select==0.1.2
+
+##installation de sqlite3 avec sudo apt install sqlite3
