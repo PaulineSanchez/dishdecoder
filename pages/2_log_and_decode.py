@@ -44,6 +44,8 @@ st.session_state["ocr_response"] = None if "ocr_response" not in st.session_stat
 st.session_state["username"] = None if "username" not in st.session_state else st.session_state["username"]
 st.session_state["logged_in"] = False if "logged_in" not in st.session_state else st.session_state["logged_in"]
 st.session_state["history"] = [] if "history" not in st.session_state else st.session_state["history"]
+st.session_state["cropped_image"] = None if "cropped_image" not in st.session_state else st.session_state["cropped_image"]
+st.session_state["user_image"] = None if "user_image" not in st.session_state else st.session_state["user_image"]
 
 st.title("Dish Decoder 🍲")
 st.header("_Welcome {} ! Decode Recipes, Translate Tastes - Dish Decoder!_".format(st.session_state["username"]))
@@ -111,10 +113,6 @@ def get_history():
                 st.session_state["history"].append({'URL': url, 'Describe': description, 'Timestamp': timestamp})
 
 
-cropped_img = None
-user_image = None
-
-
 tab_history, tab_decode = st.tabs(["History", "Decode"])
 
 with tab_history:
@@ -136,10 +134,8 @@ with tab_decode:
         uploaded_image= st.file_uploader("1. Select an image of the recipe of your choice...", type=["jpg", "png", "jpeg"])
 
         if uploaded_image is not None:
-            user_image = Image.open((uploaded_image))
-            st.image(user_image, caption='Here is the recipe you just uploaded', use_column_width=True)
-
-    user_image = user_image
+            st.session_state["user_image"] = Image.open((uploaded_image))
+            st.image(st.session_state["user_image"], caption='Here is the recipe you just uploaded', use_column_width=True)
 
     with col_ocr:
         st.markdown("2. Let's crop that tasty recipe...")
@@ -148,9 +144,9 @@ with tab_decode:
         cropcheck = st.checkbox(label="Crop that recipe ! ", value=False)
         if cropcheck:
 
-            if user_image is not None:
+            if st.session_state["user_image"] is not None:
 
-                img_file = user_image
+                img_file = st.session_state["user_image"]
 
                 col_realtime, col_boxcolor, col_aspect = st.columns(3)
                 with col_realtime:
@@ -168,18 +164,17 @@ with tab_decode:
                     }
                     aspect_ratio = aspect_dict[aspect_choice]
                 # Get a cropped image from the frontend
-                cropped_img = st_cropper(img_file, realtime_update=realtime_update, box_color=box_color,
+                st.session_state["cropped_image"] = st_cropper(img_file, realtime_update=realtime_update, box_color=box_color,
                                                 aspect_ratio=aspect_ratio)
 
                 # Manipulate cropped image at will
                 st.write("Preview")
-                _ = cropped_img.thumbnail((800, 800))
-                st.image(cropped_img)
+                _ =  st.session_state["cropped_image"].thumbnail((800, 800))
+                st.image(st.session_state["cropped_image"])
 
             else :
                 st.markdown(":warning: Please upload an image first !")
 
-    cropped_img = cropped_img
 
     with col_translation:
         st.markdown("3. Let's ocr and translate that fabulous recipe...")
@@ -194,8 +189,8 @@ with tab_decode:
                 source_lang = "en"
                 target_lang = "fr"
 
-            if cropped_img is not None:
-                r = api_ocr(cropped_img, source_lang, target_lang)
+            if st.session_state["cropped_image"] is not None:
+                r = api_ocr(st.session_state["cropped_image"], source_lang, target_lang)
                 if r.status_code == 200:
                     st.session_state["ocr_response"] = r.content
                 else:
@@ -223,7 +218,6 @@ with tab_decode:
                     st.success("Recipe saved to your history !")
                 else:
                     st.error("Please enter a description")
-
 
 
 if st.button("Go back to home page") or not st.session_state["logged_in"]:
