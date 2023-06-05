@@ -49,7 +49,11 @@ st.session_state["user_image"] = None if "user_image" not in st.session_state el
 st.session_state["user_id"] = None if "user_id" not in st.session_state else st.session_state["user_id"]
 
 st.title("Dish Decoder 🍲")
-st.header("_Welcome {} ! Decode Recipes, Translate Tastes - Dish Decoder!_".format(st.session_state["username"]))
+
+if st.session_state["username"] is not None:
+    st.header("_Welcome {} ! Decode Recipes, Translate Tastes - Dish Decoder!_".format(st.session_state["username"].capitalize()))
+else:
+    st.header("_Welcome {} ! Decode Recipes, Translate Tastes - Dish Decoder!_".format(st.session_state["username"]))
 
 st.markdown("###")
 st.markdown("###")

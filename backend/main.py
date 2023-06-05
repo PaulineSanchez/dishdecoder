@@ -6,6 +6,7 @@ from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import Response
 
 from service import Service
+from sqlalchemy import func
 from sqlmodel import Session
 from sqlmodel import create_engine, SQLModel
 
@@ -115,6 +116,24 @@ def check_user(
         else:
             return {"result": False}  # Identifiants invalides
         
+
+@app.post("/check_username", status_code=200, tags=["check_username"])
+def check_username(
+    username: str = Form(...),
+):
+    """
+    Check_username vérifie si un nom d'utilisateur est déjà utilisé. Les noms d'utilisateurs doivent être uniques. Les majuscules et minuscules ne sont pas prises en compte.
+
+    Args:
+        username (str): Nom d'utilisateur
+    """
+    with Session(engine) as session:
+        user = session.query(User).filter(func.lower(User.username) == func.lower(username)).first()
+
+        if user is None:
+            return {"result": True} # Nom d'utilisateur disponible
+        else:
+            return {"result": False} # Nom d'utilisateur indisponible
 
 
 @app.post("/get_user_id", status_code=200, tags=["get_user_id"])

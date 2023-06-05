@@ -77,6 +77,16 @@ def api_get_user_id(username: str, password: str):
     result = json.loads(response.content)
     return result
 
+def api_check_username(username: str):
+    """
+    Call the API to check if the username is already taken.
+    """
+    url = "http://localhost:7680/check_username"
+    data = {"username": username}
+    response = requests.post(url, data=data)
+    result = json.loads(response.content).get("result")
+    return result
+
 col_describe, col_imageexemple, col_buttons = st.columns([1, 1, 1])
 
 
@@ -102,36 +112,6 @@ with col_describe:
 with col_imageexemple:
     st.image("dishexplorer.png", use_column_width=True, caption="It would have been easier with Dish Decoder...")
 
-# Connexion à la base de données SQLite
-connection = sqlite3.connect("database.db")
-
-# Création de la table user si elle n'existe pas déjà
-with connection:
-    cursor = connection.cursor()
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS user (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL,
-            email TEXT NOT NULL,
-            password TEXT NOT NULL
-        )
-        """
-    )
-
-    # Création de la table link si elle n'existe pas déjà
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS link (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            url TEXT NOT NULL,
-            description TEXT NOT NULL,
-            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            user_id INTEGER NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES user (id)
-        )
-        """
-    )
 
 with col_buttons:
   
@@ -160,12 +140,17 @@ with col_buttons:
 
             # Vérification des champs vides
             if submitted_signup:
-                # Appel de l'API pour créer un nouvel utilisateur
-                reponse_api = api_create_user(username, email, password)
-                if reponse_api.status_code == 200:
-                    st.success("Compte créé avec succès, connectez-vous depuis l'onglet 'Log in'")
+                check_username = api_check_username(username)
+                if check_username == False:
+                    st.error("Ce nom d'utilisateur est déjà pris, veuillez en choisir un autre")
+                    st.stop()
                 else:
-                    st.error("Une erreur s'est produite lors de la création du compte, veuillez réessayer et vous assurer de remplir tous les champs")
+                    # Appel de l'API pour créer un nouvel utilisateur
+                    reponse_api = api_create_user(username, email, password)
+                    if reponse_api.status_code == 200:
+                        st.success("Compte créé avec succès, connectez-vous depuis l'onglet 'Log in'")
+                    else:
+                        st.error("Une erreur s'est produite lors de la création du compte, veuillez réessayer et vous assurer de remplir tous les champs")
                     
 
     if buttons == "Log in":
