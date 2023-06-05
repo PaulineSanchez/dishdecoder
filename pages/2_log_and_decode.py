@@ -58,8 +58,6 @@ else:
 st.markdown("###")
 st.markdown("###")
 
-# Connexion à la base de données SQLite
-connection = sqlite3.connect("backend/database.db")
 
 def api_ocr(image: Image.Image, source_lang: str, target_lang: str):
     """

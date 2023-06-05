@@ -1,4 +1,5 @@
 import io
+import re
 from pathlib import Path
 from PIL import Image
 
@@ -94,6 +95,7 @@ def create_user(
 
         return user
 
+
 @app.post("/check_user", status_code=200, tags=["check_user"])
 def check_user(
     username: str = Form(...),
@@ -107,7 +109,7 @@ def check_user(
         password (str): Mot de passe
     """
     with Session(engine) as session:
-        user = session.query(User).filter(User.username == username).first()
+        user = session.query(User).filter(func.lower(User.username) == func.lower(username)).first()
 
         if user is None:
             return {"result": False}  # Utilisateur introuvable
@@ -116,6 +118,7 @@ def check_user(
         else:
             return {"result": False}  # Identifiants invalides
         
+
 
 @app.post("/check_username", status_code=200, tags=["check_username"])
 def check_username(
@@ -134,6 +137,34 @@ def check_username(
             return {"result": True} # Nom d'utilisateur disponible
         else:
             return {"result": False} # Nom d'utilisateur indisponible
+        
+
+@app.post("/check_email", status_code=200, tags=["check_email"])
+def check_email(
+    email: str = Form(...),
+):
+    """
+    Check_email vérifie si une adresse email est au bon format.
+    """
+    email_pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    if re.match(email_pattern, email):
+        return {"result": True} # Adresse email valide
+    else:
+        return {"result": False} # Adresse email invalide
+
+
+@app.post("/check_password", status_code=200, tags=["check_password"])
+def check_password(
+    password: str = Form(...),
+):
+    """
+    Check_password vérifie si un mot de passe est au bon format.
+    """
+    password_pattern = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\W]{8,}$" # Au moins 8 caractères, une majuscule, une minuscule et un chiffre
+    if re.match(password_pattern, password):
+        return {"result": True} # Mot de passe valide
+    else:
+        return {"result": False} # Mot de passe invalide
 
 
 @app.post("/get_user_id", status_code=200, tags=["get_user_id"])
@@ -149,7 +180,7 @@ def get_user_id(
         password (str): Mot de passe
     """
     with Session(engine) as session:
-        user = session.query(User).filter(User.username == username, User.password == password).first()
+        user = session.query(User).filter(func.lower(User.username) == func.lower(username), User.password == password).first()
 
         return user.id
 

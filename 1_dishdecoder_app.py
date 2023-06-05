@@ -67,6 +67,7 @@ def api_check_user(username: str, password: str):
     result = json.loads(response.content).get("result")
     return result
 
+
 def api_get_user_id(username: str, password: str):
     """
     Call the API to get the user id.
@@ -83,6 +84,26 @@ def api_check_username(username: str):
     """
     url = "http://localhost:7680/check_username"
     data = {"username": username}
+    response = requests.post(url, data=data)
+    result = json.loads(response.content).get("result")
+    return result
+
+def api_check_email(email: str):
+    """
+    Call the API to check if the email has the right form.
+    """
+    url = "http://localhost:7680/check_email"
+    data = {"email": email}
+    response = requests.post(url, data=data)
+    result = json.loads(response.content).get("result")
+    return result
+
+def api_check_password(password: str):
+    """
+    Call the API to check if the password has the right form.
+    """
+    url = "http://localhost:7680/check_password"
+    data = {"password": password}
     response = requests.post(url, data=data)
     result = json.loads(response.content).get("result")
     return result
@@ -138,19 +159,36 @@ with col_buttons:
             password = create_user_form.text_input("Mot de passe", type="password", key="e")
             submitted_signup = create_user_form.form_submit_button("Créer un compte")
 
-            # Vérification des champs vides
+            # Vérification des champs du formulaire
             if submitted_signup:
-                check_username = api_check_username(username)
-                if check_username == False:
+                is_valid = True
+                
+                # Vérification du nom d'utilisateur
+                check_username_result = api_check_username(username)
+                if not check_username_result:
                     st.error("Ce nom d'utilisateur est déjà pris, veuillez en choisir un autre")
-                    st.stop()
-                else:
-                    # Appel de l'API pour créer un nouvel utilisateur
+                    is_valid = False
+                
+                # Vérification du mot de passe
+                check_password_result = api_check_password(password)
+                if not check_password_result:
+                    st.error("Le mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule et un chiffre")
+                    is_valid = False
+                
+                # Vérification de l'adresse e-mail
+                check_email_result = api_check_email(email)
+                if not check_email_result:
+                    st.error("Veuillez entrer une adresse email valide")
+                    is_valid = False
+                
+                # Création du compte si tous les champs sont valides
+                if is_valid:
                     reponse_api = api_create_user(username, email, password)
                     if reponse_api.status_code == 200:
                         st.success("Compte créé avec succès, connectez-vous depuis l'onglet 'Log in'")
                     else:
                         st.error("Une erreur s'est produite lors de la création du compte, veuillez réessayer et vous assurer de remplir tous les champs")
+
                     
 
     if buttons == "Log in":
@@ -160,7 +198,7 @@ with col_buttons:
             username = login_form.text_input("Nom d'utilisateur", key="nn")
             password = login_form.text_input("Mot de passe", type="password", key="b")
             submitted = login_form.form_submit_button("Connexion")
-
+          
             # Vérification des champs
             if submitted:
                 r = api_check_user(username, password)
