@@ -46,6 +46,7 @@ st.session_state["logged_in"] = False if "logged_in" not in st.session_state els
 st.session_state["history"] = [] if "history" not in st.session_state else st.session_state["history"]
 st.session_state["cropped_image"] = None if "cropped_image" not in st.session_state else st.session_state["cropped_image"]
 st.session_state["user_image"] = None if "user_image" not in st.session_state else st.session_state["user_image"]
+st.session_state["user_id"] = None if "user_id" not in st.session_state else st.session_state["user_id"]
 
 st.title("Dish Decoder 🍲")
 st.header("_Welcome {} ! Decode Recipes, Translate Tastes - Dish Decoder!_".format(st.session_state["username"]))
@@ -54,7 +55,7 @@ st.markdown("###")
 st.markdown("###")
 
 # Connexion à la base de données SQLite
-connection = sqlite3.connect("database.db")
+connection = sqlite3.connect("backend/database.db")
 
 def api_ocr(image: Image.Image, source_lang: str, target_lang: str):
     """
@@ -91,39 +92,62 @@ def api_img2cloud(image: Image.Image):
     response = requests.post(url, files=files)
     return response
 
-def get_history():
-    """
-    Get the history of translations from the database.
-    """
-    with connection:
-        cursor = connection.cursor()
-        cursor.execute("SELECT link.url, link.description, link.timestamp FROM link JOIN user ON link.user_id = user.id WHERE user.username = ?", (st.session_state.username,))
-        links = cursor.fetchall()
 
-        # Liste des liens (dans l'ordre inverse)
-        all_links = links[::-1]
+def api_add_to_links(url_link: str, description: str, user_id: int):
+    """
+    Call the API to add a new link.
+    """
+    url="http://localhost:7680/add_to_links"
+    data = {"url": url_link, "description": description, "user_id": user_id}
+    response = requests.post(url, data=data)
+    return response
 
-        # Afficher les liens
-        if all_links:
+
+def api_get_links(user_id: int):
+    """
+    Call the API to get the links of a user.
+    """
+    url="http://localhost:7680/get_links"
+    data = {"user_id": user_id}
+    response = requests.post(url, data=data)
+    result = json.loads(response.content)
+    print(user_id)
+    print(result)
+ 
+    if result is not None:
+        if len(result) > 0:
+            all_links = result
+
+            # Afficher les liens
             st.session_state["history"] = []
             for link in all_links:
-                url = link[0]
-                description = link[1]
-                timestamp = link[2]
-                st.session_state["history"].append({'URL': url, 'Describe': description, 'Timestamp': timestamp})
+                if isinstance(link, dict):
+                    url = link.get("url")
+                    description = link.get("description")
+                    timestamp = link.get("timestamp")
+                    st.session_state["history"].append({'URL': url, 'Describe': description, 'Timestamp': timestamp})
+        else:
+            all_links = []
+    else:
+        all_links = []
 
+    return all_links
+    
 
 tab_history, tab_decode = st.tabs(["History", "Decode"])
 
+
 with tab_history:
-    get_history()
+
+    history = api_get_links(st.session_state["user_id"])
     if st.button("Refresh :recycle:"):
-        get_history()
+        history = api_get_links(st.session_state["user_id"])
+    st.subheader("Saved recipes")
     if st.session_state["history"]:   
-        st.subheader("Saved recipes")
         st.dataframe(pd.DataFrame(st.session_state["history"]))
     else:
-        st.info("Aucun lien sauvegardé")
+        st.info("No saved recipe")
+
 
 
 with tab_decode:
@@ -207,18 +231,19 @@ with tab_decode:
                 if description is not None and description != "":
                     r = api_img2cloud(st.session_state["ocr_response"])
                     received_url = r.text
-                    with connection:
-                        cursor = connection.cursor()
-                        current_timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-                        cursor.execute(
-                            "INSERT INTO link (url, description, timestamp, user_id) VALUES (?, ?, ?, ?)",
-                            (received_url, description, current_timestamp, st.session_state.user_id),
-                        )
-                        connection.commit()
-                    st.success("Recipe saved to your history !")
+                    add_bdd = api_add_to_links(received_url, description, st.session_state["user_id"])
+                    if add_bdd.status_code == 200:
+                        st.success("Recipe saved !")
+                    else:
+                        st.error("An error occured during the saving process")                 
                 else:
                     st.error("Please enter a description")
 
 
 if st.button("Go back to home page") or not st.session_state["logged_in"]:
+    st.session_state["user_id"] = None
+    st.session_state["history"] = []
     switch_page("dishdecoder_app")
+
+
+

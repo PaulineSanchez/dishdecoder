@@ -47,6 +47,36 @@ st.markdown("###")
 st.markdown("###")
 
 
+def api_create_user(username: str, email: str, password: str):
+    """
+    Call the API to create a new user.
+    """
+    url="http://localhost:7680/create_user"
+    data = {"username": username, "email": email, "password": password}
+    response = requests.post(url, data=data)
+    return response
+
+
+def api_check_user(username: str, password: str):
+    """
+    Call the API to check the user credentials.
+    """
+    url = "http://localhost:7680/check_user"
+    data = {"username": username, "password": password}
+    response = requests.post(url, data=data)
+    result = json.loads(response.content).get("result")
+    return result
+
+def api_get_user_id(username: str, password: str):
+    """
+    Call the API to get the user id.
+    """
+    url = "http://localhost:7680/get_user_id"
+    data = {"username": username, "password": password}
+    response = requests.post(url, data=data)
+    result = json.loads(response.content)
+    return result
+
 col_describe, col_imageexemple, col_buttons = st.columns([1, 1, 1])
 
 
@@ -130,18 +160,13 @@ with col_buttons:
 
             # Vérification des champs vides
             if submitted_signup:
-                if not username or not email or not password:
-                    st.error("Veuillez remplir tous les champs d'entrée")
+                # Appel de l'API pour créer un nouvel utilisateur
+                reponse_api = api_create_user(username, email, password)
+                if reponse_api.status_code == 200:
+                    st.success("Compte créé avec succès, connectez-vous depuis l'onglet 'Log in'")
                 else:
-                    # Ajout de l'utilisateur à la base de données
-                    with connection:
-                        cursor = connection.cursor()
-                        cursor.execute(
-                            "INSERT INTO user (username, email, password) VALUES (?, ?, ?)",
-                            (username, email, password),
-                        )
-                        connection.commit()
-                        st.success("Utilisateur créé avec succès")
+                    st.error("Une erreur s'est produite lors de la création du compte, veuillez réessayer et vous assurer de remplir tous les champs")
+                    
 
     if buttons == "Log in":
         with container:
@@ -153,20 +178,15 @@ with col_buttons:
 
             # Vérification des champs
             if submitted:
-                if not username or not password:
-                    st.error("Veuillez remplir tous les champs d'entrée")
+                r = api_check_user(username, password)
+                print(r)
+                if r :
+                    st.session_state["logged_in"] = True
+                    st.session_state["username"] = username
+                    r_user_id = api_get_user_id(username, password)
+                    st.session_state["user_id"] = r_user_id
+                    st.success("Connexion réussie")
+                    switch_page("log_and_decode")
                 else:
-                    # Vérification des informations de connexion dans la base de données
-                    with connection:
-                        cursor = connection.cursor()
-                        cursor.execute("SELECT * FROM user WHERE username = ?", (username,))
-                        user = cursor.fetchone()
-                        if user and user[3] == password:
-                            st.session_state.logged_in = True
-                            st.session_state.username = user[1]
-                            st.session_state.user_id = user[0]
-                            switch_page("log_and_decode")
-                        else:
-                            st.error("Nom d'utilisateur ou mot de passe incorrect")
+                    st.error("Nom d'utilisateur ou mot de passe incorrect")
 
-    
