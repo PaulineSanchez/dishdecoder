@@ -1,9 +1,11 @@
 import io
 import re
+import base64
+import json
 from pathlib import Path
 from PIL import Image
 
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException
 from fastapi.responses import Response
 
 from service import Service
@@ -11,12 +13,14 @@ from sqlalchemy import func
 from sqlmodel import Session
 from sqlmodel import create_engine, SQLModel
 
-from models import User, Link ,engine
+from models import User, Link ,engine, Data
+from alerting import send_discord_notification
 
 
 app = FastAPI()
 
 service = Service()
+
 
 @app.get("/")
 def root():
@@ -41,13 +45,27 @@ def inference(
         file (UploadFile): Fichier image à traiter
     """
     image = Image.open(io.BytesIO(file.file.read()))
-    result = service.inference(image, source_lang, target_lang)
+    result, concatenated_ocr_texts, corrected_sentences, translated_paragraph = service.inference(image, source_lang, target_lang)
 
-    with io.BytesIO() as output:
-        result.save(output, format="PNG")
-        contents = output.getvalue() 
+    if result is None:
+        raise HTTPException(status_code=404, detail="The OCR wasn't able to detect any text in the image.")
 
-    return Response(contents, media_type="image/png")
+    else:
+        with io.BytesIO() as output:
+            result.save(output, format="PNG")
+            image_contents = output.getvalue() 
+
+            concatenated_ocr_texts_json = json.dumps(concatenated_ocr_texts)
+            corrected_sentences_json = json.dumps(corrected_sentences)
+            translated_paragraph_json = json.dumps(translated_paragraph)
+
+
+        return {
+            "image": base64.b64encode(image_contents).decode("utf-8"),
+            "concatenated_ocr_texts": concatenated_ocr_texts_json,
+            "corrected_sentences": corrected_sentences_json,
+            "translated_paragraph": translated_paragraph_json,
+        }
 
 @app.post("/img2cloud", status_code=200, tags=["img2cloud"])
 def img2cloud(
@@ -73,6 +91,7 @@ def get_users():
         users = session.query(User).all()
 
         return users
+    
 
 @app.post("/create_user", status_code=200, tags=["create_user"])
 def create_user(
@@ -92,6 +111,11 @@ def create_user(
         user = User(username=username, email=email, password=password)
         session.add(user)
         session.commit()
+
+        # Envoi de la notification Discord
+        message = f"Un nouvel utilisateur a été créé : {username}"
+        send_discord_notification(message)
+
 
         return user
 
@@ -224,9 +248,42 @@ def get_links(
 
         return links
 
+@app.post("/add_rating", status_code=200, tags=["add_rating"])
+def add_rating(
+    user_id: int = Form(...),
+    user_rating: int = Form(...),
+    ocr_entry: str = Form(...),
+    corrected_ocr: str = Form(...),
+    translation_output: str = Form(...),
+): 
+    """
+    Add rating ajoute une note sur la qualité de la traduction à la base de données.
+    Args:
+        user_id (int): Id de l'utilisateur
+        user_rating (int): Note de l'utilisateur
+        ocr_entry (str): Texte original
+        corrected_ocr (str): Texte corrigé
+        translation_output (str): Texte traduit
+    """
 
+    with Session(engine) as session:
+        rating = Data(user_id=user_id, user_rating=user_rating, ocr_entry=ocr_entry, corrected_ocr=corrected_ocr, translation_output=translation_output)
+        session.add(rating)
+        session.commit()
 
-
+        return rating
+        
+@app.post("/get_data", status_code=200, tags=["get_data"])
+def get_data():
+     
+     """
+    Get_data récupère la liste des données de la base de données.
+    """
+     
+     with Session(engine) as session:
+        data = session.query(Data).all()
+        return data
+            
 
 
 if __name__ == "__main__":

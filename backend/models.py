@@ -22,6 +22,14 @@ class Link(SQLModel, table=True, extend_existing=True):
     user_id: int = Field(foreign_key="user.id")
 
 
+class Data(SQLModel, table=True, extend_existing=True):
+    id: int = Field(primary_key=True)
+    ocr_entry: str
+    corrected_ocr : str
+    translation_output: str
+    user_rating: int
+    user_id: int = Field(foreign_key="user.id")
+
 database_url = "sqlite:///backend/database.db"
 engine = create_engine(database_url)
 SQLModel.metadata.create_all(engine)

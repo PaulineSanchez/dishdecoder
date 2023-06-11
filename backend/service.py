@@ -9,7 +9,7 @@ import cloudinary.uploader
 import numpy as np
 import openai
 from paddleocr import PaddleOCR
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from transformers import pipeline
 
 from config import settings
@@ -34,22 +34,25 @@ class Service:
             lang="latin",
         )
         self.en_to_fr = pipeline(
-            model=settings.en_to_fr_model_path, 
-            tokenizer=settings.en_to_fr_model_path, 
-            task="translation_en_to_fr",
-            device=settings.device,
+            "translation",
+            model="PaulineSanchez/mt-en-fr_finetuned-recipes", 
+            # tokenizer=settings.en_to_fr_model_path, 
+            #device=settings.device,
         )
         self.fr_to_en = pipeline(
+            "translation",
             model=settings.fr_to_en_model_path, 
-            tokenizer=settings.fr_to_en_model_path, 
-            task="translation_fr_to_en",
-            device=settings.device,
+            # tokenizer=settings.fr_to_en_model_path, 
+            # task="translation_fr_to_en",
+            #device=settings.device,
         )
 
-        self.prompt_en = "Correct only the grammar and the orthograph of the following recipe or list of ingredients without digressing from the original text, you only need to define each step well, don't add things that aren't present in the original text, never add any text to explain what you are doing:\n{sentence}"
-        self.prompt_fr = "Corrige seulement la grammaire et l'orthographe de la recette ou la liste d'ingérdients suivante sans faire de disgression par rapport au texte original, il faut seulement que chaque étape soit bien définie, n'ajoute rien qui ne soit pas présent dans le texte de base, ne jamais ajouter de texte pour expliquer ce que tu fais:\n{sentence}"
+        # self.prompt_en = "Correct only the grammar and the orthograph of the following recipe or list of ingredients without digressing from the original text, you only need to define each step well, don't add things that aren't present in the original text, never add any text to explain what you are doing:\n{sentence}"
+        # self.prompt_fr = "Corrige seulement la grammaire et l'orthographe de la recette ou la liste d'ingérdients suivante sans faire de disgression par rapport au texte original, il faut seulement que chaque étape soit bien définie, n'ajoute rien qui ne soit pas présent dans le texte de base, ne jamais ajouter de texte pour expliquer ce que tu fais:\n{sentence}"
+        self.prompt_en = "Correct only the grammar and the orthograph of the following text:\n\n {sentence}"
+        self.prompt_fr = "Corrige seulement la grammaire et l'orthographe du texte suivant :\n\n {sentence}"
 
-    def inference(self, image:Image.Image, source_lang: str, target_lang: str) -> Image.Image:
+    def inference(self, image:Image.Image, source_lang: str, target_lang: str) -> Tuple[Union[Image.Image, str], str, str, str]:
         """
         Inference lance le processus de traduction du texte sur une image.
 
@@ -60,6 +63,7 @@ class Service:
         
         Returns:
             Image.Image: Image avec le texte traduit
+
         """
         ocr_results = self.do_ocr(image)
         ocr_texts = [line[1][0] for line in ocr_results]
@@ -67,24 +71,38 @@ class Service:
         
         # ocr_confidence = [line[1][1] for line in ocr_results]
         input_sentence = concatenated_ocr_texts
-        try:
-            corrected_sentences = self.do_correct_text(input_sentence, source_lang)
-            print(corrected_sentences)
-        except openai.error.RateLimitError as e:
-            print(e)
-            corrected_sentences = input_sentence
-            
 
-        corrected_sentences_splitted = corrected_sentences.split("\n")
-
-        # ocr_bbox = [line[0] for line in ocr_results]
-        # translated_texts = self.do_translation(ocr_texts, source_lang, target_lang)
-        translated_paragraph = self.do_translation(corrected_sentences_splitted, source_lang, target_lang)
-        print(translated_paragraph)
-        print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
+        if input_sentence == "":
         
-        post_processed_image = self.do_post_processing_for_paragraphs(translated_paragraph)
-        return post_processed_image
+            return None
+
+        else:
+
+            try:
+                corrected_sentences = self.do_correct_text(input_sentence, source_lang)
+                print("===============")
+                print(corrected_sentences)
+                print(len(corrected_sentences))
+                print("===============")
+            except openai.error.RateLimitError as e:
+                print(e)
+                corrected_sentences = input_sentence
+                
+            print(type(corrected_sentences))
+            corrected_sentences_splitted = corrected_sentences.split("\n")
+
+            with open("corrected_sentences.json", "w") as f:
+                json.dump(corrected_sentences, f, indent=4)
+
+            # ocr_bbox = [line[0] for line in ocr_results]
+            # translated_texts = self.do_translation(ocr_texts, source_lang, target_lang)
+            translated_paragraph = self.do_translation(corrected_sentences_splitted, source_lang, target_lang)
+            print(translated_paragraph)
+            print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
+            
+            post_processed_image = self.do_post_processing_for_paragraphs(translated_paragraph)
+
+        return post_processed_image, concatenated_ocr_texts, corrected_sentences, translated_paragraph
         
     def do_ocr(self, image:Image.Image) -> List[List[Union[List[List[float]], Tuple[str, float]]]]:
         """
@@ -117,13 +135,24 @@ class Service:
             prompt= self.prompt_en.format(sentence=sentence)
         if source_lang == "fr":
             prompt= self.prompt_fr.format(sentence=sentence)    
-        completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo", 
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.1,
+        # completion = openai.ChatCompletion.create(
+        # model="gpt-3.5-turbo", 
+        # messages=[{"role": "user", "content": prompt}],
+        # temperature=0.1,
+        # )
+
+        # return (completion['choices'][0]['message']['content'])   
+        completion = openai.Completion.create(  
+        model="text-davinci-003", 
+        prompt= prompt,
+        temperature=0.3,
+        max_tokens=2048,
+        top_p=1.0,
+        frequency_penalty=0.0,
+        presence_penalty=0.0
         )
 
-        return (completion['choices'][0]['message']['content'])    
+        return completion['choices'][0].text
 
     def do_translation(self, ocr_texts: List[str], source_lang: str, target_lang: str) -> List[str]:
         """
@@ -141,10 +170,13 @@ class Service:
             ValueError: Si la langue source n'est pas 'en' ou 'fr'
         """
 
+        liste_filtree = [element for element in ocr_texts if len(element)>10 ]
+        print(liste_filtree)
+
         if source_lang == "en":
-            translated_texts = self.en_to_fr(ocr_texts)
+            translated_texts = self.en_to_fr(liste_filtree)
         elif source_lang == "fr":
-            translated_texts = self.fr_to_en(ocr_texts)
+            translated_texts = self.fr_to_en(liste_filtree)
         else:
             raise ValueError("Source language must be either 'en' or 'fr'")
         
@@ -209,26 +241,93 @@ class Service:
         Returns:
             Image.Image: Image de base avec le rectangle et les paragraphes traduits
         """
-        
-        image = Image.new("RGBA", (600, 600), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(image)
-        font = ImageFont.truetype(settings.font_path, 14)
+        # width, height = 600, 600
+        # background_image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
 
-        # On crée un rectangle opaque sur toute la surface de l'image
-        draw.rectangle([(0, 0), image.size], fill="white")
+        # # Charger l'image à coller
+        # image_to_paste = Image.open("dishdecoderlogo2.png").convert("RGBA")
 
-        # On écrit les paragraphes traduits sur l'image
-        for i, paragraph in enumerate(translated_paragraphs):
-            x, y = 0, i*20
-            text = "\n".join(textwrap.wrap(paragraph, width=100))
-            draw.text((x, y), text, font=font, fill="black")
+        # # Redimensionner l'image à coller pour s'adapter à la largeur de l'image de fond
+        # image_to_paste = ImageOps.fit(image_to_paste, (width, int(height/4)))
 
-        return image
+        # # Coller l'image sur l'image de fond
+        # background_image.paste(image_to_paste, (0, 0))
+
+        # # Créer un nouvel objet ImageDraw pour dessiner sur l'image de fond
+        # draw = ImageDraw.Draw(background_image)
+
+        # font = ImageFont.truetype(settings.font_path, 14)
+
+        # # On crée un rectangle opaque sur toute la surface de l'image
+        # draw.rectangle([(0, 0), background_image.size], fill="white")
+
+        # if len(translated_paragraphs) == 1 and isinstance(translated_paragraphs[0], str):
+        #     lines = textwrap.wrap(translated_paragraphs[0], width=70)
+        #     y = int(height/4) + 50   # Position du texte en haut de l'image
+        #     for line in lines:
+        #         text_width, text_height = draw.textsize(line, font=font)
+        #         #x = (width - text_width) / 2 pour centrer le texte
+        #         x = 40
+        #         draw.text((x, y), line, font=font, fill="black")
+        #         y += text_height + 10  # Espacement entre les lignes
+
+        # elif len(translated_paragraphs) > 1:
+        #     y = int(height/4) + 50  # Position du texte en haut de l'image
+        #     for text in translated_paragraphs:
+        #         if isinstance(text, str):
+        #             lines = textwrap.wrap(text, width=70)
+        #             for line in lines:
+        #                 text_width, text_height = draw.textsize(line, font=font)
+        #                 #x = (width - text_width) / 2 pour centrer le texte
+        #                 x = 40
+        #                 draw.text((x, y), line, font=font, fill="black")
+        #         y += text_height + 10  # Espacement entre les lignes
    
+        # Créer une image de fond
+        width, height = 600, 600
+        background_image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+
+        # Créer un nouvel objet ImageDraw pour dessiner sur l'image de fond
+        draw = ImageDraw.Draw(background_image)
+
+        # Définir la police et la taille du texte
+        font = ImageFont.truetype("arial.ttf", 14)
+
+        # Vérifier si la liste contient une seule chaîne de caractères
+        if len(translated_paragraphs) == 1 and isinstance(translated_paragraphs[0], str):
+            lines = textwrap.wrap(translated_paragraphs[0], width=70)
+            y = 75  # Position du texte en haut de l'image
+            for line in lines:
+                text_width, text_height = draw.textsize(line, font=font)
+                x = (width - text_width) / 2
+                draw.text((x, y), line, font=font, fill="black")
+                y += text_height + 10  # Espacement entre les lignes
+
+        elif len(translated_paragraphs) > 1:
+            y = 75  # Position du texte en haut de l'image
+            for text in translated_paragraphs:
+                if isinstance(text, str):
+                    lines = textwrap.wrap(text, width=70)
+                    for line in lines:
+                        text_width, text_height = draw.textsize(line, font=font)
+                        x = (width - text_width) / 2
+                        draw.text((x, y), line, font=font, fill="black")
+                        y += text_height + 10  # Espacement entre les lignes
+
+        # Charger l'image à coller
+        image_to_paste = Image.open("dishdecoderlogo2.png").convert("RGBA")
+
+        # Redimensionner l'image à la taille de l'image de fond
+        image_to_paste.thumbnail((width, int(height/4)))
+
+        # Coller l'image sur l'image de fond
+        background_image.paste(image_to_paste, (70, 0), mask=image_to_paste)
+
+        return background_image
+    
     def image_to_cloud(self, image: Image.Image) -> str:
         """
         Image to cloud envoie l'image sur Cloudinary et retourne l'url de l'image.
-
         Args:
             image (Image.Image): Image à envoyer sur le cloud
         
@@ -244,3 +343,7 @@ class Service:
         image_url = response["secure_url"]
 
         return image_url
+   
+    
+        
+    

