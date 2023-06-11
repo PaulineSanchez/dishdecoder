@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-import json
-import re
 
 from streamlit_extras.switch_page_button import switch_page
 

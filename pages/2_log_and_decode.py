@@ -1,35 +1,29 @@
-from datetime import datetime
-import numpy as np
 import pandas as pd
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
 import io
 from typing import Union
 import re
 
-import cloudinary
-import cloudinary.uploader
-from st_btn_select import st_btn_select
 import streamlit as st
 from streamlit_cropper import st_cropper
 from streamlit_extras.switch_page_button import switch_page
 
 import json
 import requests
-import sqlite3
 
 from io import BytesIO
 import base64
 from PIL import Image
 
-import discord
 from discord import SyncWebhook
 
 
-#This is the second page of Dish Decoder, the user can only access it if he has logged in
-#The user can see his history of translations and can also translate a new image
-#These two tasks are available through two tabs
-#After having translated an image, the user can give his opinion on the translation. This opinion is then sent to the API.
-#The user can also logout from this page, it leads him back to the login page and clears the session state
+#This is the second page of Dish Decoder, the user can only access it if he has logged in.
+#The user can see his history of translations and can also translate a new image.
+#These two tasks are available through two tabs.
+#After having translated an image, the user can save it to his history by clicking on the button "Save to history".
+#Also, the user can give his opinion on the translation by clicking on the button "Rate the translation".
+#The user can also logout from this page, it leads him back to the login page and clears the session state.
 
 st.set_option('deprecation.showfileUploaderEncoding', False)
 

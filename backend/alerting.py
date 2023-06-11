@@ -1,6 +1,4 @@
-import discord
 from discord import SyncWebhook
-
 from config import settings
 
 

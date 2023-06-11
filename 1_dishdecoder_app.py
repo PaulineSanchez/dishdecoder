@@ -1,15 +1,9 @@
-import numpy as np
-from PIL import Image, UnidentifiedImageError
-import io
-
-from st_btn_select import st_btn_select
 import streamlit as st
-from streamlit_cropper import st_cropper
+from st_btn_select import st_btn_select
 from streamlit_extras.switch_page_button import switch_page
 
 import json
 import requests
-import sqlite3
 
 #Dish Decoder is an application where you can perform OCR on a recipe and translate it.
 #The OCR and translation parts are powered by an API made with FastAPI. 

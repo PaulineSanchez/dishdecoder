@@ -1,5 +1,4 @@
 import json
-import math
 import textwrap
 from typing import List, Tuple, Union
 from io import BytesIO
@@ -9,7 +8,7 @@ import cloudinary.uploader
 import numpy as np
 import openai
 from paddleocr import PaddleOCR
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageFont
 from transformers import pipeline
 
 from config import settings
@@ -35,20 +34,13 @@ class Service:
         )
         self.en_to_fr = pipeline(
             "translation",
-            model="PaulineSanchez/mt-en-fr_finetuned-recipes", 
-            # tokenizer=settings.en_to_fr_model_path, 
-            #device=settings.device,
+            model=settings.en_to_fr_model_path, 
         )
         self.fr_to_en = pipeline(
             "translation",
             model=settings.fr_to_en_model_path, 
-            # tokenizer=settings.fr_to_en_model_path, 
-            # task="translation_fr_to_en",
-            #device=settings.device,
         )
 
-        # self.prompt_en = "Correct only the grammar and the orthograph of the following recipe or list of ingredients without digressing from the original text, you only need to define each step well, don't add things that aren't present in the original text, never add any text to explain what you are doing:\n{sentence}"
-        # self.prompt_fr = "Corrige seulement la grammaire et l'orthographe de la recette ou la liste d'ingérdients suivante sans faire de disgression par rapport au texte original, il faut seulement que chaque étape soit bien définie, n'ajoute rien qui ne soit pas présent dans le texte de base, ne jamais ajouter de texte pour expliquer ce que tu fais:\n{sentence}"
         self.prompt_en = "Correct only the grammar and the orthograph of the following text:\n\n {sentence}"
         self.prompt_fr = "Corrige seulement la grammaire et l'orthographe du texte suivant :\n\n {sentence}"
 
@@ -135,13 +127,7 @@ class Service:
             prompt= self.prompt_en.format(sentence=sentence)
         if source_lang == "fr":
             prompt= self.prompt_fr.format(sentence=sentence)    
-        # completion = openai.ChatCompletion.create(
-        # model="gpt-3.5-turbo", 
-        # messages=[{"role": "user", "content": prompt}],
-        # temperature=0.1,
-        # )
-
-        # return (completion['choices'][0]['message']['content'])   
+         
         completion = openai.Completion.create(  
         model="text-davinci-003", 
         prompt= prompt,
@@ -153,6 +139,7 @@ class Service:
         )
 
         return completion['choices'][0].text
+    
 
     def do_translation(self, ocr_texts: List[str], source_lang: str, target_lang: str) -> List[str]:
         """
@@ -182,51 +169,6 @@ class Service:
         
         return [line["translation_text"] for line in translated_texts]
     
-
-
-    # def do_post_processing(self, image: Image.Image, bboxes: List[List[float]], translated_texts: List[str]) -> Image.Image:
-    #     """
-    #     Do post processing applique des rectangles opaques sur les coordonnées des bbox et les textes traduits sur l'image de base.
-
-    #     Args:
-    #         image (Image.Image): Image de base
-    #         bboxes (List[List[float]]): Liste de listes de coordonnées des bbox
-    #         translated_texts (List[str]): Liste de textes traduits
-
-    #     Returns:
-    #         Image.Image: Image de base avec les rectangles et les textes traduits
-    #     """
-        
-    #     draw = ImageDraw.Draw(image)
-    #     font = ImageFont.truetype(settings.font_path, 14)
-
-    #     for bbox, text in zip(bboxes, translated_texts):
-    #         x, y = bbox[0][0], bbox[0][1]
-
-    #         bbox = [tuple(point) for point in bbox]
-    #         draw.polygon(bbox, fill="white")
-            
-    #         dx = bbox[1][0] - bbox[0][0]
-    #         dy = bbox[1][1] - bbox[0][1]
-    #         angle = math.degrees(math.atan2(dy, dx))
-
-    #         center_point = ((x + bbox[2][0]) // 2, (y + bbox[2][1]) // 2)
-
-    #         rotated_img = image.rotate(angle, center=center_point, resample=Image.BICUBIC, expand=True)
-
-    #         text_img = Image.new("RGBA", rotated_img.size, (0, 0, 0, 0))
-    #         text_draw = ImageDraw.Draw(text_img)
-
-    #         rotated_position = (center_point[0] - font.getsize(text)[0] // 2, center_point[1] - font.getsize(text)[1] // 2)
-    #         text_draw.text(rotated_position, text, font=font, fill="black")
-
-    #         text_img = text_img.rotate(-angle, center=center_point, resample=Image.BICUBIC)
-
-
-    #         image.paste(text_img, mask=text_img)
-
-            
-    #     return image
     
     def do_post_processing_for_paragraphs(self, translated_paragraphs: list()) -> Image.Image:
         """
@@ -241,48 +183,7 @@ class Service:
         Returns:
             Image.Image: Image de base avec le rectangle et les paragraphes traduits
         """
-        # width, height = 600, 600
-        # background_image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-
-        # # Charger l'image à coller
-        # image_to_paste = Image.open("dishdecoderlogo2.png").convert("RGBA")
-
-        # # Redimensionner l'image à coller pour s'adapter à la largeur de l'image de fond
-        # image_to_paste = ImageOps.fit(image_to_paste, (width, int(height/4)))
-
-        # # Coller l'image sur l'image de fond
-        # background_image.paste(image_to_paste, (0, 0))
-
-        # # Créer un nouvel objet ImageDraw pour dessiner sur l'image de fond
-        # draw = ImageDraw.Draw(background_image)
-
-        # font = ImageFont.truetype(settings.font_path, 14)
-
-        # # On crée un rectangle opaque sur toute la surface de l'image
-        # draw.rectangle([(0, 0), background_image.size], fill="white")
-
-        # if len(translated_paragraphs) == 1 and isinstance(translated_paragraphs[0], str):
-        #     lines = textwrap.wrap(translated_paragraphs[0], width=70)
-        #     y = int(height/4) + 50   # Position du texte en haut de l'image
-        #     for line in lines:
-        #         text_width, text_height = draw.textsize(line, font=font)
-        #         #x = (width - text_width) / 2 pour centrer le texte
-        #         x = 40
-        #         draw.text((x, y), line, font=font, fill="black")
-        #         y += text_height + 10  # Espacement entre les lignes
-
-        # elif len(translated_paragraphs) > 1:
-        #     y = int(height/4) + 50  # Position du texte en haut de l'image
-        #     for text in translated_paragraphs:
-        #         if isinstance(text, str):
-        #             lines = textwrap.wrap(text, width=70)
-        #             for line in lines:
-        #                 text_width, text_height = draw.textsize(line, font=font)
-        #                 #x = (width - text_width) / 2 pour centrer le texte
-        #                 x = 40
-        #                 draw.text((x, y), line, font=font, fill="black")
-        #         y += text_height + 10  # Espacement entre les lignes
-   
+          
         # Créer une image de fond
         width, height = 600, 600
         background_image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
