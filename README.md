@@ -29,7 +29,7 @@ III. DISHDECODER
         3.1.9 Le stockage du modèle
 
     3.2 Les modèles de traduction
-        3.2.1 Les choix des modèles
+        3.2.1 Le choix des modèles
         3.2.2 Les données nécessaires à l’entraînement des modèles
         3.2.3 La création du dataset
         3.2.4 Le prétraitement des données
@@ -244,7 +244,28 @@ INSERER ICI LES RESULTATS OBTENUS POUR CHAQUE ENTRAINEMENT
 
 Comme nous pouvons le constater, le modèle ayant la meilleure accuracy est le premier à avoir été entraîné. C'est donc celui-ci que nous allons utiliser pour la suite de ce projet.
 
+Cependant, le modèle obtenu après l'entraînement n'est pas utilisable en l'état. Après entraînement tous les modèles PaddleOCR sont composés de trois fichiers : un fichier en .pdopt, un fichier en .pdparams et un fichier en .states. Dans notre cas ces trois fichiers sont stockés dans le dossier ./output/v3_latin_mobile_FINETUNING_1/best_accuracy. Afin de pouvoir utiliser ce modèle, il a donc fallu le convertir en un modèle utilisable par PaddleOCR.
 
+ Pour cela, j'ai éxecuté la commande suivante : 
+```$ python3 tools/export_model.py -c configs/rec/PP-OCRv3/multi_language/latin_PP-OCRv3_rec_4_finetuning.yml -o Global.pretrained_model=./output/v3_latin_mobile_FINETUNING_1/best_accuracy Global.save_inference_dir=./inference```
 
+Une fois cette commande exécutée, le modèle fut converti et stocké dans le dossier inference. 
+Le modèle est alors composé de trois nouveaux fichiers : inference.pdiparams, qui est le fichier de paramètres du modèle, inference.pdiparams.info, qui est le fichier d'informations du modèle et inference.pdmodel, qui est le fichier de programme du modèle en lui-même.
+Afin de facilité l'utilisation du nouveau modèle, je crée un dossier ocr_model et j'ai ajouté dans ce dossier les trois fichiers d'inférence convertis, le fichier de configuration du modèle en .yml ainsi que le dictionnaire utilisé en .txt.
+
+INSERER ICI UNE IMAGE DU DOSSIER OCR_MODEL
+
+3.1.9 Le stockage du modèle
+
+Afin de pouvoir utiliser ce modèle dans ce projet et dans d'autres à venir, j'ai décidé de le stocker sur le Hub Hugging Face. Pour cela, j'ai créé un nouveau repository sur mon compte Hugging Face et j'ai ajouté les fichiers du modèle dans ce repository.
+Le modèle est donc maintenant disponible à l'adresse suivante : https://huggingface.co/PaulineSanchez/PaddleOCR_ft
+
+INSERER ICI UNE IMAGE DU HUB HUGGING FACE AVEC LE MODELE DANS LE REPOSITORY
+
+3.2 Les modèles de traduction
+
+3.2.1 Le choix des modèles
+
+Comme pour l'OCR, une multitude de modèles de traduction existe. 
 
 
