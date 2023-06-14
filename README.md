@@ -540,4 +540,4 @@ Parmi les choses qui prennent un peu plus de temps, il y a :
 - trouver un moyen pour me passer du recadrage des images
 - trouver un moyen de convertir les unités de mesures dans les recettes
 
-Je pense que Dishdecoder est une application qui peut avoir de l'avenir et qui saurait sans doute trouver son public. 
+Je pense que Dishdecoder est une application qui peut avoir de l'avenir et qui saurait sans doute trouver son public. Certes TextGrabber et Deepl existent mais il paraît que l'humain préfère de plus en plus aller à la simplicité. Alors quoi de plus simple que de prendre une photo de son livre de recettes et de se faire traduire la recette en un clic ? 
