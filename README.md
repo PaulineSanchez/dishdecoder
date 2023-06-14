@@ -411,7 +411,7 @@ Les fichiers models.py, config.py et database.db sont utilisés pour définir et
 
 Le fichier config.py contient une classe Settings qui stocke les configurations du projet. Les attributs de cette classe incluent des clés d'API, les informations de connexion sur Cloudinary, une URL de webhook Discord, les chemins des modèles de traduction sur le hub d'Hugging Face, ainsi que d'autres paramètres. Les valeurs de configuration sont chargées à partir d'un fichier .env en utilisant la bibliothèque dotenv. Les valeurs peuvent être accédées via l'instance settings de la classe Settings.
 
-Le fichier models.py définit les modèles de données utilisés dans le projet. Trois classes sont définies : User, Link et Data. Ces classes correspondent aux tables de la base de données. Chaque classe utilise la bibliothèque sqlmodel pour définir les attributs et les relations entre les tables. Par exemple, la classe Link contient des attributs tels que id, url, description, timestamp et user_id. Le fichier crée également une instance de moteur de base de données engine qui utilise SQLite comme backend.
+Le fichier models.py définit les modèles de données utilisés dans le projet. Trois classes sont définies : User, Link et Data. Ces classes correspondent aux tables de la base de données. Chaque classe utilise la bibliothèque SQLmodel pour définir les attributs et les relations entre les tables. Par exemple, la classe Link contient des attributs tels que id, url, description, timestamp et user_id. Le fichier crée également une instance de moteur de base de données engine qui utilise SQLite comme backend.
 
 Le fichier database.db est la base de données SQLite utilisée par l'API. 
 
@@ -422,4 +422,47 @@ Le fichier alerting.pycontient une fonction send_discord_notification qui est ut
 INSERER ICI UN SCHEMA DE L'API
 
 ### 3.4.3 La base de données relationnelle
+
+La base de données utilisée dans ce projet est une base de données relationnelle, qui stocke les informations relatives aux utilisateurs et à ce qu'ils créent sur l'application. La base de données est mise en œuvre à l'aide du système de gestion de base de données SQLite.
+
+La structure de la base de données est définie à l'aide de la bibliothèque SQLmodel, qui permet de créer des modèles de données Python qui sont ensuite mappés aux tables de la base de données. Dans ce projet, nous utilisons trois tables principales : User, Link et Data.
+
+La table User contient les informations relatives aux utilisateurs de l'application. Chaque utilisateur est représenté par un enregistrement dans cette table, avec des attributs tels que id, username, email et password. L'attribut id est une clé primaire qui permet d'identifier de manière unique chaque utilisateur.
+
+La table Link stocke les liens URL des images générées par l'utilisateur et stockées sur Cloudinary. Chaque enregistrement dans cette table est lié à un utilisateur spécifique à l'aide de la clé étrangère user_id. Les autres attributs de cette table comprennent id, url, description et timestamp, qui enregistre la date et l'heure de création de chaque enregistrement.
+
+La table Data est utilisée pour stocker les données générées par les utilisateurs dans un souci d'amélioration de l'application. Chaque enregistrement dans cette table est associé à un utilisateur et contient des attributs tels que id, ocr_entry, corrected_ocr, translation_output et user_rating. L'attribut user_id établit la relation avec la table User via une clé étrangère.
+
+L'utilisation d'une base de données relationnelle permet de stocker de manière organisée et structurée les informations nécessaires au bon fonctionnement de l'application. Les relations entre les tables garantissent l'intégrité des données et permettent de récupérer facilement les informations liées à un utilisateur spécifique.
+
+La création et la gestion de la base de données sont gérées par l'instance du moteur de base de données engine créée à l'aide de SQLmodel. Lorsque l'application démarre, les tables sont créées automatiquement si elles n'existent pas déjà.
+
+L'API contient plusieurs endpoints qui permettent d'agir sur la base de données soit en insérant des données, soit en récupérant des données.
+Tous les endpoints liés à la base de données se situent dans le fichier main.py. Les endpoints sont les suivants :
+
+- /create_user : Crée un nouvel utilisateur en enregistrant les informations fournies (nom d'utilisateur, adresse e-mail, mot de passe) dans la table "User" de la base de données.
+
+- /check_user : Vérifie les identifiants d'un utilisateur en comparant le nom d'utilisateur et le mot de passe fournis avec ceux enregistrés dans la base de données.
+
+- /check_username : Vérifie si un nom d'utilisateur est déjà utilisé en comparant le nom d'utilisateur fourni avec ceux enregistrés dans la base de données. Les noms d'utilisateurs doivent être uniques, sans tenir compte de la casse.
+
+- /check_email : Vérifie si une adresse e-mail est au bon format en utilisant une expression régulière.
+
+- /check_password : Vérifie si un mot de passe est au bon format en utilisant une expression régulière.
+
+- /get_user_id : Récupère l'ID d'un utilisateur en vérifiant les identifiants (nom d'utilisateur et mot de passe) fournis.
+
+- /add_to_links : Ajoute un lien à la liste des liens en enregistrant l'URL, la description et l'ID de l'utilisateur dans la table "Link" de la base de données.
+
+- /get_links : Récupère la liste des liens d'un utilisateur spécifique en utilisant son ID.
+
+- /add_rating : Ajoute une note sur la qualité de la traduction à la base de données en enregistrant l'ID de l'utilisateur, la note donnée par l'utilisateur, le texte original, le texte corrigé et le texte traduit dans la table "Data".
+
+- /get_data : Récupère la liste de toutes les données enregistrées dans table "Data".
+
+A propos des requêtes utilisées pour interagir avec la base de données, La méthode query est utilisée pour effectuer des requêtes de recherche, la méthode add pour ajouter de nouveaux enregistrements, et la méthode commit pour valider les changements effectués dans la session et les sauvegarder dans la base de données. 
+
+INSERER ICI UN SCHEMA DE LA BASE DE DONNEES
+
+### 3.4.5 Le stockage des images des utilisateurs
 
