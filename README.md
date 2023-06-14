@@ -66,8 +66,7 @@ IV. CONCLUSION
 
     4.1 La réalisation du projet
     4.2 Les difficultés rencontrées
-    4.3 Les améliorations possibles
-    4.4 Les perspectives d'évolution
+    4.3 Les améliorations et les perspectives d'évolution
     
 
 # I. Introduction
@@ -502,3 +501,43 @@ Enfin, l'intérêt d'afficher un tableau avec les notes des utilisateurs à prop
 L'interaction avec la base de données relationnelle et avec les modèles d'intelligence artificelle se fait grâce à des appels API. Pour cela, j'ai utilisé la bibliothèque Python requests. Cette bibliothèque permet d'envoyer des requêtes HTTP. Ainsi, pour envoyer une requête à l'API, il suffit de préciser l'URL de l'API, le type de requête (GET, POST, PUT, DELETE) et les paramètres de la requête. Afin d'intégrer ces appels à l'API convenablement dans l'application, j'ai créé une fonction pour chaque requête. Ainsi, lorsque l'utilisateur clique sur un bouton, la fonction correspondante est appelée et la requête est envoyée à l'API.
 Cela permet également de bien séparer le front-end du back-end. En effet, le front-end sert uniquement à l'affichage et ne fait que des appels à l'API, il n'interagit pas directement avec la base de données ou avec les modèles d'intelligence artificielle. Cela permet de rendre l'application plus robuste et plus facile à maintenir. En effet, si l'on souhaite modifier la base de données ou les modèles d'intelligence artificielle, il suffit de modifier l'API, sans avoir à modifier le front-end.
 
+## 3.6 L'organisation du projet
+
+### 3.6.1 Le GANTT
+
+### 3.6.2 Le Kanban
+
+### 3.6.3 Le GitHub
+
+Dès le début du projet, j'ai créé un dépôt GitHub pour pouvoir versionner mon code. Ainsi, à chaque ajout de fonctionnalité, je faisais un commit depuis mon IDE, VSCode. Cela était rassurant car je gardaus la possibilité de revenir à une version antérieure de mon code en cas de problème. Aussi, Cela m'a été utile pour pouvoir travailler sur différents ordinateurs sans avoir à transférer les fichiers. En effet, il suffisait de cloner le dépôt sur l'ordinateur sur lequel je souhaitais travailler. 
+
+# IV. CONCLUSION
+
+## 4.1 La réalisation du projet
+
+Réaliser Dishdecoder fut une expérience enrichissante pour de nombreuses raisons. 
+Tout d'abord, en raison de la partie sur la traduction. Venant d'une formation spécialisée dans les langues étrangères, j'ai toujours été intéressée et passionée par la traduction. Cependant, je n'avais pas encore eu l'occasion de mêler mes nouvelles connaissances en intelligence artificielle à ma passion pour la traduction. C'est donc avec beaucoup d'enthousiasme et d'intérêt que j'ai réalisé ce projet et découvert cette branche de la NLP. 
+Ensuite, je n'avais pas encore eu l'opportunité de travailler sur un projet qui utilise plusieurs modèles d'intelligence artificielle à la suite. J'ai donc apprécié pouvoir combiner ici un modèle d'OCR, un modèle de correction de texte et un modèle de traduction. 
+Par ailleurs, ce projet m'a prouvé une fois encore que ce qui me plaît le plus est la constitution de jeux de données. En effet, j'ai passé beaucoup de temps à réunir les données que je souhaitais pour le modèle d'OCR et les modèles de traduction, mais cela n'a jamsi été un fardeau car j'ai pu obtenir exactement ce que je voulais et en plus de cela, les résultats ont été très satisfaisants.
+Enfin, avoir un projet que j'ai crée de toute pièce et qui fonctionne est très gratifiant. Cela m'a permis de voir que j'étais capable de réaliser un projet de A à Z et de le mener à bien.
+
+## 4.2 Les difficultés rencontrées
+
+Je pense que la difficulté majeure dans ce genre de projet est de réussir à s'arrêter. Que ce soit lors de la constitution de jeux de données, lors de l'entraîenment de modèle ou lors de la réalisation de l'interface graphique et de l'intégration des différentes fonctionnalités, il m'a toujours été très compliqué de savoir quand m'arrêter. En effet, il y a toujours quelque chose à améliorer, à modifier ou à ajouter. Cependant, il faut savoir s'arrêter à un moment donné pour pouvoir passer à autre chose.
+Une autre difficulté fut dans le choix de la technologie à utiliser pour l'interface graphique. En effet, lors de ma formation et de mon alternance nous avons très souvent utilisé Streamlit. J'apprécie beaucoup Streamlit car je trouve leur documentation très claire et en plus il y a toujours des nouveautés qui apportent de réels changements. Cependant, j'avais envie de changer et d'utiliser une autre technologie. J'ai donc commencé à utiliser Pynecone. La prise en main fut un peu plus compliquée car la documentation est moins claire et surtout il y a beaucoup moins de ressources sur internet étant donné que Pynecone est relativement récent. Toutefois, j'avais réussi à créer ma première page. Les problèmes vinrent lorsque j'ai eu besoin d'utiliser un wrapper React afin d'utiliser un widget me permettant de recadrer les images. Malgré tous mes efforts cela n'a jamais fonctionné comme je l'espèrais et lorsque j'ai voulu intégrer FastAPI à Pynecone j'ai compris que cela n'allait pas être possible non plus. J'ai donc décidé de revenir à Streamlit. Cela m'a permis de me rendre compte que Streamlit est vraiment une technologie que j'apprécie et que je maîtrise bien.
+
+## 4.3 Les améliorations et les perspectives d'évolution
+
+J'ai déjà de nombreuses idées pour améliorer Dishdecoder. 
+Parmi les choses simples à faire, il y a :
+- le fait d'intégrer un bouton qui permet à l'utilisateur de télécharger sur son ordinateur l'image qu'il a générée.
+- le fait d'intégrer à l'interface administateur des statistiques sur les notes données aux traductions par les utilisateurs.
+
+Parmi les choses qui prennent un peu plus de temps, il y a :
+- le fait d'intégrer de nouvelles langues de traduction, notamment l'espagnol et l'italien.
+- le fait de finetuner un modèle me permettant de faire de la correction orthographique.
+- le fait d'augmenter le nombre d'entrées dans le jeu de données pour les modèles de traduction.
+- trouver un moyen pour me passer du recadrage des images
+- trouver un moyen de convertir les unités de mesures dans les recettes
+
+Je pense que Dishdecoder est une application qui peut avoir de l'avenir et qui saurait sans doute trouver son public. 
