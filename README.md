@@ -355,4 +355,13 @@ INSERER ICI CAPTURE D'ECRAN DES MODELES ET DE LEUR SCORE BLEU
 
 Ainsi, pour le modèle de traduction anglais-français, le meilleur modèle est celui entraîné avec un batch size de 8 et 3 epochs. Pour le modèle de traduction français-anglais, le meilleur modèle est celui entraîné avec un batch size de 12 et 4 epochs.
 
+### 3.2.9 Le stockage des modèles
+
+Une fois que j'ai déterminé les meilleurs modèles, je les ai envoyé sur le Hub de Hugging Face afin de pouvoir les utiliser par la suite. J'ai utilisé la fonction `push_to_hub` de Hugging Face pour envoyer mes modèles sur le Hub. Il est a noté que la fonction `push_to_hub` utilise Git et Git LFS pour envoyer les modèles sur le Hub. Ainsi, peu importe la taille du modèle, il sera envoyé sur le Hub.
+Mes modèles ont été stockés aux adresses suivantes `https://huggingface.co/PaulineSanchez/translation_for_recipes_en_fr` pour le modèle anglais vers français et `https://huggingface.co/PaulineSanchez/translation_for_recipes_fr_en` pour le modèle français vers anglais.
+Ces modèles sont en mode public afin que tout le monde puisse y avoir accès et les utiliser.
+
+INSERER ICI LE CODE POUR ENVOYER LES MODELES SUR LE HUB DE HUGGING FACE + FLOUTER LE TOKEN
+
+INSERER ICI UNE CAPTURE D'ECRAN DES MODELES SUR LE HUB DE HUGGING FACE
 
