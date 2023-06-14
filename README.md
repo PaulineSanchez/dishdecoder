@@ -365,3 +365,35 @@ INSERER ICI LE CODE POUR ENVOYER LES MODELES SUR LE HUB DE HUGGING FACE + FLOUTE
 
 INSERER ICI UNE CAPTURE D'ECRAN DES MODELES SUR LE HUB DE HUGGING FACE
 
+## 3.3 L'utilisation d'Open AI
+
+### 3.3.1 Pouquoi le choix d'OPEN AI ?
+
+Maintenant que mes modèles d'OCR et de traduction étaient finetunés, j'ai souhaité ajouté un bloc entre les deux qui me permettrait de corriger la grammaire et l'orthographe de la sortie de l'OCR afin que le modèle de traduction puisse fonctionner sur un texte correct et ne pas être perturbé par des erreurs. En effet, la moindre confusion entre deux caractères plutôt proches ou même l'ajout de caractère peut entraîner une erreur de traduction. Ainsi, j'ai souhaité utiliser un modèle de correction orthographique et grammaticale afin de corriger les potentielles erreurs de l'OCR.
+
+Après de nombreuses recherches, je n'ai pas réussi à trouver un package Python qui me permettrait de faire cela de la manière dont je l'entends. J'ai pu tester Pygrammalecte qui est un wrapper Python autour de Grammelecte. Grammelecte est un correcteur grammatical et typographique open-source pour le français. Il a différent modules pour être ajouté sur Google Chrome, Firefox, Libre Office, Open Office ... Cependant, sa version Python n'était pas adaptée à ce que je souhaitais faire. En effet, Pygrammalecte ne permet pas de corriger un texte mais seulement de donner des suggestions de correction pour un mot donné. Par ailleurs, de nombreux mots corrects étaient signalés comme n'existant pas. Cela signifait donc que les dictionnaires utilisés en arrière plan n'étaient pas à jour voir erronnés. Je n'ai rien trouvé d'autre qui pouurrait fonctionner pour la correction en français. Il y a des projets qui existent mais soit ils ne fonctionnent pas, soit ils sont inachevés, soit ils ne sont pas utilisables en Python.
+
+Du côté des outils similaires à chatGPT et Open AI, là aussi j'ai trouvé des alternatives mais aucune qui puisse fonctionner aussi bien et toutes avaient un coût plus élevé.
+
+### 3.3.2 L'API d'Open AI
+
+Afin de pouvoir utiliser l'API d'Open AI, j'ai eu besoin de créer un compte sur leur site. Une fois le compte crée, j'ai lié ma carte bancaire à mon compte et défini un seuil au delà duquel mes requêtes sont automatiquement rejetée et donc je ne paye pas plus. Sur Open AI, la facturation ne se fait pas à l'appel (de l'API) mais au nombre de tokens. Une fois tout cela mis en place, j'ai pu générer et récupérer ma clé API. 
+J'ai également dû installer le package `openai` en utilisant la commande `pip install openai`.
+L'API d'Open AI permet d'utiliser de nombreux modèles dont par exemple gpt-3.5-turbo ou encore text-davinci-003.
+
+### 3.3.3 Le modèle utilisé
+
+Pour répondre à mes besoins, j'ai décidé d'utiliser le modèle de completions `text-davinci-003`. Ce modèle est censé être le plus performant parmi ceux disponibles pour les tâches de linguistique. En effet, il doit pouvoir effectuer n'importe quelle tâche de linguistique comme la traduction ou la correction orthographique en apportant une qualité supérieure et un bon suivi des instructions. 
+`text-davinci-003` a une limite maximale de 4 097 tokens. Les tokens sont des fragments de texte qui peuvent être aussi courts qu'un seul caractère ou aussi longs qu'un mot. La limite de tokens est importante car les modèles ont une contrainte sur le nombre maximum de tokens qu'ils peuvent traiter dans une seule entrée ou sortie.
+
+### 3.3.4 Le prompt
+
+Comme pour chatGPT, j'ai dû créer un prompt pour mon modèle. Le prompt est une phrase qui va permettre au modèle de comprendre ce que l'on attend de lui. Ainsi, j'ai créé un prompt qui permettra à mon modèle de corriger les erreurs orthographiques et grammaticales de l'OCR. Etant donné que certaines sorties seront en anglais et d'autres en français, j'ai crée un prompt pour chaque langue. Voici les prompt que j'ai utilisé : 
+- Pour le français : ```"Corrige seulement la grammaire et l'orthographe du texte suivant :\n\n {sentence}"```
+- Pour l'anglais : ```"Correct only the grammar and the orthograph of the following text:\n\n {sentence}"```
+
+
+## 3.4 Le back-end
+
+### 3.4.1 L'API
+
