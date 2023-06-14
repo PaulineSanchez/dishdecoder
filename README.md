@@ -286,3 +286,13 @@ Souhaitant utiliser des modèles spécialisés dans les tâches de traduction ne
 ### 3.2.2 Les données nécessaires à l'entraînement des modèles
 
 Souhait faire de la traduction de l'anglais vers le français et du français vers l'anglais, j'ai choisi de finetuner les deux modèles suivants :
+`Helsinki-NLP/opus-mt-fr-en` pour la traduction du français vers l'anglais, et `Helsinki-NLP/opus-mt-en-fr` pour la traduction de l'anglais vers le français.
+Pour finetuner ces modèles, j'allais avoir besoin d'un dataset contenant des phrases en anglais et leur traduction en français. Afin d'obtenir de bonnes performances, il fallait que ce dataset soit composé de phrases plus ou moins longues et de phrases plus ou moins complexes. De plus, le but de ce finetuning était pour moi d'obtenir des modèles spécialisés dans la thématique de la cuisine. Il fallait donc que le dataset contienne des phrases en lien avec la cuisine. Par ailleurs, plus le dataset allait être volumineux, plus les performances des modèles allaient être bonnes.
+
+Afin de pouvoir finetuner mes modèles, le moyen le plus efficace était de créer des datasets avec la librairie Datasets de Hugging Face. Cette librairie permet de créer des datasets à partir de fichiers JSON, CSV, TXT, XML, etc. 
+Il fallait donc dans un premier temps que je crée un fichier CSV avec les données sur lesquelles je souhaitais finetuner mon modèle.
+Le CSV devait avoir une colonne `id` qui s'incrémente à chaque nouvelle entrée et une colonne `translation` qui contient la phrase en anglais et sa traduction en français.
+J'ai donc crée un CSV avec ces caractéristiques et il ne me restait plus qu'à le remplir avec les données que je souhaitais. 
+
+### 3.2.3 La création du dataset
+
