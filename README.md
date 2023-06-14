@@ -55,8 +55,7 @@ III. DISHDECODER
         3.5.1 L'utilisation de Streamlit
         3.5.2 La schématisation du front-end
         3.5.3 Les fonctionnalités de l'application
-        3.5.4 Le parcours utilisateur
-        3.5.5 Le parcours administrateur
+        3.5.4 L'interaction avec le back-end
     
     3.6 L'organisation du projet
         3.6.1 Le Trello (GANT ?)
@@ -469,4 +468,37 @@ INSERER ICI UN SCHEMA DE LA BASE DE DONNEES
 Afin de pouvoir stocker les images générées par les utilisateurs, j'ai choisi d'utiliser Cloudinary. Cloudinary est un service de stockage d'images basé sur le cloud. La version gratuite de Cloudinary permet de stocker jusqu'à 25 Go de données. Cloudinary s'intègre très bien dans Dishdecoder, car il existe une bibliothèque Python qui permet d'interagir avec l'API de Cloudinary. Cela permet d'envoyer une image sur Cloudinary, de l'y stocker et de récupérer son URL en quelques lignes de code.
 Ainsi, lorsqu'un utilisateur génère une image de recette traduite, il a la possibilité de lui donner une description et de la sauvegarder dans son espace personnel. Cela va en réalité envoyer l'image sur Cloudinary et enregistrer l'URL de l'image et la description donnée par l'utilisateur dans la base de données. Par la suite lorsque l'utilisateur ira dans son espace personnel, il y retrouvera l'image, la description de celle-ci, ainsi que la date et l'heure à laquelle elle a été enregistrée. Autrement dit, l'image n'est pas stockée dans la base de données, mais sur Cloudinary. Cela permet de ne pas surcharger la base de données avec des images, et de ne pas avoir à gérer le stockage de ces images.
 
+
+## 3.5 Le front-end
+
+### 3.5.1 L'utilisation de Streamlit
+
+Pour le front-end de l'application, j'ai choisi d'utiliser Streamlit. Streamlit est un framework open-source qui permet de créer des applications web en Python. Streamlit possède de très nombreuses fonctionnalités qui permettent de créer des applications web interactives et personnalisées. Il est notamment possible d'ajouter des formulaires, des zones de texte, des boutons, de créer plusieurs pages, d'afficher des tableaux etc. La communauté de Streamlit étant très active de nouvelles fonctionnalités sont ajoutés régulièrement et il est également possible de trouver des modules créés par des utilisateurs qui permettent d'ajouter davantage de fonctionnalités supplémentaires. 
+
+Streamlit ne doit cependant pas être utilisé pour le déploiement d'applications ou de site web. Streamlit est avant tout un démonstrateur. Streamlit est donc bien adapté dans le cadre de ce projet.
+
+### 3.5.2 La schématisation du front-end
+
+INSERER ICI LE SCHEMA DU FRONT-END
+
+### 3.5.3 Les fonctionnalités de l'application
+
+L'application est composée de 3 pages: la page d'accueil, la page de traduction et d'espace personnel, et la page de l'administrateur.
+
+La page d'acceuil comprend une courte description de l'application, une image de l'égérie de l'application, ainsi que des boutons pour créer un compte utilisateur ou se connecter à un compte existant.
+
+La seconde page comprend deux onglets. Le premier onglet affiche l'historique des enregistrements de l'utilisateur, ceux-ci sont consignés dans un tableau. Chaque entrée comprend, un id, l'image générée par l'utilisateur, la description que l'utilisateur a donné à son image, et la date et l'heure où l'image a été enregistrée. Il y a également un bouton qui permet de rafaîchir le tableau. Dans l'autre onglet, il est possible de télécharger une image, de la recadrer de façon à n'avoir qu'un seul paragraphe, et enfin de choisir si on veut effectuer une traduction de l'anglais vers le français ou du français vers l'anglais. Une fois que la traduction est effectuée, une nouvelle image va apparaître avec le texte traduit. L'utilisateur a alors la possibilité de donner une description à l'image et de l'enregistrer dans son espace personnel. L'utilisateur peut également choisir de donner une note à la traduction. Enfin, en bas de la page, il y a un bouton qui permet de retourner à la page d'accueil.
+
+La troisième page, qui n'est accessible qu'à l'administrateur après avoir rentré son nom d'utilisateur et son mot de passe dans l'espace de connexion, contient un tableau où sont consignées les traductions que l'utilisateur a choisi de noter. Chaque entrée comprend, un id, le texte extrait par l'OCR, le texte corrigé par OpenAI, la traduction de ce texte et la note donnée par l'utilisateur. Il y a également un code couleur à l'intérieur du tableau en fonction de la note donnée par l'utilisateur afin que cela attire l'attention de l'administrateur. Enfin, en bas de la page, il y a un bouton qui permet à l'administrateur de télécharger le tableau en CSV et un autre qui permet de retourner à la page d'accueil.
+
+D'autre part, des messages d'erreurs sont affichés lorsque l'utilisateur ne remplit pas correctement les champs des formulaires ou lorsqu'il y a un problème de connexion à l'API ou encore losrque l'API renvoie une erreur.
+
+Lorsque l'API renvoie un message d'erreur ou lorsqu'un nouveau utilisateur est crée, un message est envoyé à l'administrateur sur le serveur Discord de Dishdecoder en lui spécifiant le type d'erreur ou le nom du nouvel utilisateur. Cela permet à l'administrateur de pouvoir réagir rapidement en cas de problème.
+
+Enfin, l'intérêt d'afficher un tableau avec les notes des utilisateurs à propos des traductions est de pouvoir améliorer les modèles d'intelligence artificielle. En effet, l'administrateur peut voir quelles sont les traductions qui ont été mal notées et en tenir compte lorsqu'il constituera un nouveau jeu de données pour ré-entraîner les modèles. Cela permettra d'améliorer les modèles et donc d'améliorer la qualité des traductions. 
+
+### 3.5.4 L'interaction avec le back-end
+
+L'interaction avec la base de données relationnelle et avec les modèles d'intelligence artificelle se fait grâce à des appels API. Pour cela, j'ai utilisé la bibliothèque Python requests. Cette bibliothèque permet d'envoyer des requêtes HTTP. Ainsi, pour envoyer une requête à l'API, il suffit de préciser l'URL de l'API, le type de requête (GET, POST, PUT, DELETE) et les paramètres de la requête. Afin d'intégrer ces appels à l'API convenablement dans l'application, j'ai créé une fonction pour chaque requête. Ainsi, lorsque l'utilisateur clique sur un bouton, la fonction correspondante est appelée et la requête est envoyée à l'API.
+Cela permet également de bien séparer le front-end du back-end. En effet, le front-end sert uniquement à l'affichage et ne fait que des appels à l'API, il n'interagit pas directement avec la base de données ou avec les modèles d'intelligence artificielle. Cela permet de rendre l'application plus robuste et plus facile à maintenir. En effet, si l'on souhaite modifier la base de données ou les modèles d'intelligence artificielle, il suffit de modifier l'API, sans avoir à modifier le front-end.
 
