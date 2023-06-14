@@ -397,3 +397,29 @@ Comme pour chatGPT, j'ai dû créer un prompt pour mon modèle. Le prompt est un
 
 ### 3.4.1 L'API
 
+Afin de pouvoir faire communiquer ensemble les différents composants de mon application j'ai décidé de créer une API. Pour réaliser cette API j'ai utilisé le framework `fastapi`. Ce package permet de créer une API en Python. J'ai également utilisé le package `uvicorn` qui permet de lancer l'API. J'ai utilisé la commande `pip install fastapi` pour installer `fastapi` et la commande `pip install uvicorn` pour installer `uvicorn`.
+
+L'API en elle même est constituée d'un fichier main.py et d'un fichier service.py. 
+Les fichiers models.py, config.py, database.db et alerting.py sont des fichiers qui permettent de faire fonctionner l'API et qui appartiennt au back-end mais qui ne sont pas des composants directs de l'API.
+L'API communique également avec le dossier models qui contient le modèle d'OCR. En effet, bien que le modèle ait été stocké sur le hub de Hugging Face, il n'est pas possible de l'utiliser directement depuis le hub. Il faut donc le télécharger et le stocker dans un dossier.
+
+Le fichier main.py est le point d'entrée principal de l'API. Il contient les routes principales de l'API, telles que la racine ("/"), la vérification de l'état de santé de l'API ("/healthcheck"), l'inférence ("/inference"), le stockage des images sur Cloudinary ("/img2cloud"), etc. Chaque route est associée à une fonction qui définit son comportement.
+
+Le fichier service.py contient la classe Service, qui fournit les fonctionnalités principales de l'API. Cette classe utilise divers modules et modèles pour effectuer des opérations telles que l'OCR sur une image, la correction de texte via Open AI, la traduction, etc. On y retrouve également les fonctions permettant de réaliser l'inférence telles que : do_ocr, do_correct_text, do_translation, etc.
+
+Les fichiers models.py, config.py et database.db sont utilisés pour définir et gérer les modèles de données et la base de données utilisés par l'API. 
+
+Le fichier config.py contient une classe Settings qui stocke les configurations du projet. Les attributs de cette classe incluent des clés d'API, les informations de connexion sur Cloudinary, une URL de webhook Discord, les chemins des modèles de traduction sur le hub d'Hugging Face, ainsi que d'autres paramètres. Les valeurs de configuration sont chargées à partir d'un fichier .env en utilisant la bibliothèque dotenv. Les valeurs peuvent être accédées via l'instance settings de la classe Settings.
+
+Le fichier models.py définit les modèles de données utilisés dans le projet. Trois classes sont définies : User, Link et Data. Ces classes correspondent aux tables de la base de données. Chaque classe utilise la bibliothèque sqlmodel pour définir les attributs et les relations entre les tables. Par exemple, la classe Link contient des attributs tels que id, url, description, timestamp et user_id. Le fichier crée également une instance de moteur de base de données engine qui utilise SQLite comme backend.
+
+Le fichier database.db est la base de données SQLite utilisée par l'API. 
+
+Le fichier alerting.pycontient une fonction send_discord_notification qui est utilisée pour envoyer des notifications sur serveur Discord dédié à Dishdecoder. La fonction utilise la bibliothèque discord et utilise l'URL d'un webhook Discord défini dans le fichier config.py. Lorsqu'elle est appelée, la fonction envoie un message à travers le webhook. La fonction est utilisée pour envoyer des notifications pour des événements importants, tels que la création d'un nouvel utilisateur ou l'échec d'une requête.
+
+### 3.4.2 La schématisation de l'API
+
+INSERER ICI UN SCHEMA DE L'API
+
+### 3.4.3 La base de données relationnelle
+
