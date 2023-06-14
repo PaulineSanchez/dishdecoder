@@ -466,3 +466,7 @@ INSERER ICI UN SCHEMA DE LA BASE DE DONNEES
 
 ### 3.4.5 Le stockage des images des utilisateurs
 
+Afin de pouvoir stocker les images générées par les utilisateurs, j'ai choisi d'utiliser Cloudinary. Cloudinary est un service de stockage d'images basé sur le cloud. La version gratuite de Cloudinary permet de stocker jusqu'à 25 Go de données. Cloudinary s'intègre très bien dans Dishdecoder, car il existe une bibliothèque Python qui permet d'interagir avec l'API de Cloudinary. Cela permet d'envoyer une image sur Cloudinary, de l'y stocker et de récupérer son URL en quelques lignes de code.
+Ainsi, lorsqu'un utilisateur génère une image de recette traduite, il a la possibilité de lui donner une description et de la sauvegarder dans son espace personnel. Cela va en réalité envoyer l'image sur Cloudinary et enregistrer l'URL de l'image et la description donnée par l'utilisateur dans la base de données. Par la suite lorsque l'utilisateur ira dans son espace personnel, il y retrouvera l'image, la description de celle-ci, ainsi que la date et l'heure à laquelle elle a été enregistrée. Autrement dit, l'image n'est pas stockée dans la base de données, mais sur Cloudinary. Cela permet de ne pas surcharger la base de données avec des images, et de ne pas avoir à gérer le stockage de ces images.
+
+
