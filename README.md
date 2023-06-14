@@ -111,7 +111,114 @@ INSERER ICI LE SCHÉMA DE L'APPLICATION
 
 # II. ETAT DE L'ART
 
-INSERER ICI L'ETAT DE L'ART
+Introduction :
+
+Au cours des dernières années, les transformers ont révolutionné le domaine de l'apprentissage automatique et du traitement du langage naturel. Ces architectures neurales puissantes ont ouvert de nouvelles perspectives en matière de modélisation des séquences, avec des performances impressionnantes dans des tâches de NLP telles que la traduction automatique, la génération de texte ou encore la compréhension du langage.
+
+Les transformers ont émergé en 2017 avec la publication de l'article "Attention is All You Need" par Vaswani et al. Dès lors, ils ont gagné en popularité et sont devenus la référence en matière de modélisation de séquences. Ils se sont avérés particulièrement efficaces pour traiter des tâches impliquant des relations à longue distance entre deux séquences et une compréhension contextuelle approfondie.
+
+Contrairement aux approches précédentes basées sur les réseaux de neurones récurrents (RNN) ou les réseaux de neurones convolutifs (CNN), les transformers se distinguent par l'utilisation d'un mécanisme d'attention. Ce mécanisme permet aux transformers de prendre en compte les dépendances contextuelles à travers toute la séquence d'entrée, sans la nécessité d'une propagation séquentielle de l'information.
+
+Dans les transformers, l'attention permet de calculer des pondérations sur les différentes parties de la séquence d'entrée, en mettant l'accent sur les éléments les plus pertinents pour la tâche en cours. Cela permet aux transformers de capturer les relations à long terme et de modéliser des dépendances complexes, ce qui en fait des modèles très adaptés aux tâches de compréhension et de génération de séquences.
+
+Dans cet état de l'art, nous explorerons en détail les principes fondamentaux des transformers, leur architecture, ainsi que les avancées récentes dans ce domaine. Nous mettrons en évidence les performances remarquables des transformers dans des tâches clés telles que la traduction automatique et la génération de texte. Nous examinerons également les différentes variantes de transformers qui ont été proposées pour améliorer les performances et répondre à des défis spécifiques. Nous explorerons également l'évolution des transformers et mettrons en évidence leur impact significatif sur le traitement du langage naturel et d'autres tâches de modélisation de séquences.
+
+1. Contexte historique :
+
+Depuis quelques années, les entreprises utilisent de plus en plus les modèles de traduction neuronaux. Ces modèles sont des modèles de traduction automatique qui utilisent des réseaux de neurones artificiels. Ils sont capables de traduire des textes d'une langue à une autre en s'appuyant d'avantage sur le contexte. Parmi ces architectures, on retrouve notamment les RNN et les LSTM.
+
+Les réseaux de neurones récurrents (RNN) sont des modèles conçus pour traiter des séquences de texte en entrée et/ou générer des séquences de texte en sortie. Leur caractéristique principale est leur capacité à conserver une forme de mémoire grâce à des boucles récurrentes au sein de leurs couches cachées. Cela permet à l'information contextuelle de circuler à travers le réseau, de sorte que les sorties précédentes puissent influencer les calculs effectués à chaque étape temporelle.
+Cette capacité à mémoriser les informations contextuelles est similaire à notre façon de lire. Lorsque nous lisons, nous retenons les éléments importants des mots et des phrases précédentes pour les utiliser comme référence et comprendre le sens des nouveaux mots et des nouvelles phrases.
+
+Les LSTM (Long Short-Term Memory) sont une variante des RNN. En effet, bien que les RNN soient capables de conserver des informations sur de courtes périodes de temps, ils ont du mal à conserver des informations sur de longues périodes de temps. C'est ce que l'on appelle le problème de la disparition du gradient. Les LSTM peuvent donc être considérés comme des RNN améliorés. Les LSTM sont composés de trois portes : la porte d'oubli, la porte d'entrée et la porte de sortie. La porte d'oubli permet de décider quelles informations doivent être oubliées ou conservées. La porte d'entrée permet de décider quelles nouvelles informations doivent être stockées dans la cellule d'état. Enfin, la porte de sortie permet de décider quelles informations doivent être renvoyées en sortie. Ainsi, grâce à leur structure spécifique, les LSTM sont capables de capturer et de retenir des informations pertinentes sur une longue séquence, permettant ainsi de conserver la relation entre les mots à travers différentes parties de la séquence. Ils sont donc particulièrement adaptés à la traduction de textes longs. 
+
+Cependant, une révolution majeure dans le domaine de la traduction automatique est survenue en 2017 avec l'avènement des Transformers. Contrairement aux LSTM, qui sont basés sur des architectures récurrentes, les Transformers utilisent une approche basée sur l'attention pour capturer les relations entre les mots. Cette architecture révolutionnaire a permis de surmonter les limitations des LSTM en termes de gestion des dépendances à long terme et de parallélisme. Les Transformers se sont imposés comme une avancée majeure dans la traduction automatique en raison de leur capacité à traiter efficacement les séquences de texte et à capturer les dépendances contextuelles sur de plus longues distances. Grâce à leur mécanisme d'attention, les Transformers peuvent attribuer des poids différents aux mots en fonction de leur importance, ce qui leur permet de comprendre le contexte global de la phrase et d'effectuer des traductions plus précises et cohérentes. Ce mécanisme a été une avancée majeure dans le domaine du traitement du langage naturel et a permis d'obtenir des performances significativement meilleures dans des tâches telles que la traduction automatique.
+
+Depuis la publication de l'article fondateur, de nombreuses variantes et améliorations des transformers ont été proposées, telles que les transformers à plusieurs têtes, les transformers récurrents, les transformers pré-entraînés et les transformers axés sur la vision. Ces avancées ont élargi le champ d'application des transformers à différents domaines et ont contribué à leur popularité croissante.
+
+Dans la prochaine section, nous examinerons en détail les fondements des transformers, en explorant leur architecture et leur fonctionnement. Nous mettrons également en évidence les applications les plus courantes des transformers dans le domaine du traitement du langage naturel et au-delà.
+
+2. Les fondements des Transformers :
+
+Les transformers reposent sur deux principaux concepts fondamentaux : le mécanisme d'attention et les couches d'encodeur-décodeur. Ces éléments clés sont à la base de l'architecture des transformers et contribuent à leur puissance et à leur efficacité dans la modélisation des séquences.
+
+Comme nous l'avons vu précédemment, le méchanisme d'attention est l'élément novateur central pour les transformers. En effet, cela permet aux transformers de calculer des pondérations pour chaque élément de la séquence, en mettant l'accent sur les parties les plus pertinentes pour la tâche en cours. Cela diffère des approches séquentielles traditionnelles où l'information est propagée de manière linéaire à travers la séquence.
+
+Le mécanisme d'attention des transformers se compose de trois éléments clés : les requêtes (queries), les clés (keys) et les valeurs (values). Les requêtes représentent les éléments que le modèle souhaite encoder ou prédire, les clés représentent les éléments de la séquence d'entrée et les valeurs représentent les informations associées à chaque élément de la séquence. Les poids d'attention sont calculés en comparant les similarités entre les requêtes et les clés, puis en utilisant ces poids pour pondérer les valeurs.
+
+Une caractéristique importante des transformers est qu'ils peuvent calculer les poids d'attention pour tous les éléments de la séquence en parallèle. Cela permet des calculs plus rapides et efficaces par rapport aux approches séquentielles. De plus, les transformers utilisent des mécanismes d'attention multiples, appelés "têtes d'attention", qui permettent de capturer différents types de relations et d'informations contextuelles.
+
+Les transformers ont également introduit l'idée de l'apprentissage par transfert, où les modèles pré-entraînés sur de grandes quantités de données peuvent être adaptés à des tâches spécifiques après avoir subi un léger ajustement (finetuning). Cela a permis de tirer profit des modèles pré-entraînés sur de vastes corpus de texte et a grandement contribué aux excellentes performances des transformers dans diverses tâches de NLP.
+
+L'architecture des transformers est basée sur des couches d'encodeur-décodeur. L'encodeur est responsable de la compréhension de la séquence d'entrée, tandis que le décodeur génère la séquence de sortie. Chaque couche d'encodeur et de décodeur est composée de plusieurs sous-modules, tels que les couches d'attention et les réseaux de neurones entièrement connectés. Cette architecture d'encodeur-décodeur permet une compréhension complète des séquences d'entrée et une génération précise des séquences de sortie.
+
+Dans la prochaine section, nous allons explorer en détail l'architecture des transformers.
+
+3. Architecture des Transformers :
+
+L'architecture des transformers est caractérisée par une structure en couches qui permet de capturer les dépendances à longue distance dans les séquences. Chaque couche du transformer est composée de deux principaux modules : l'encodeur et le décodeur.
+
+L'encodeur est responsable de la représentation initiale des données d'entrée, tandis que le décodeur génère les prédictions à partir de cette représentation encodée. Les transformers sont généralement utilisés dans des tâches de génération de séquences, telles que la traduction automatique ou la génération de texte, où l'entrée et la sortie sont des séquences de symboles.
+
+Chaque module d'encodeur et de décodeur est lui-même composé de plusieurs couches d'attention, de couches de transformation positionnelle et de couches de feed-forward. La combinaison de ces différentes couches permet aux transformers de modéliser les relations contextuelles complexes et de générer des prédictions précises.
+
+Chaque couche de l'encodeur et du décodeur contient des sous-couches résiduelles et des couches de normalisation. Les sous-couches résiduelles permettent de conserver les informations non altérées à travers les différentes transformations, facilitant ainsi la propagation du gradient lors de l'entraînement du modèle. Les couches de normalisation garantissent une stabilité dans l'apprentissage en normalisant les activations à chaque étape.
+
+Les couches d'attention sont le cœur de l'architecture des transformers. Elles permettent aux modèles de calculer des pondérations sur les différentes parties de la séquence d'entrée, en mettant l'accent sur les éléments les plus pertinents. Les couches d'attention fonctionnent en calculant des scores d'attention entre chaque paire d'éléments dans la séquence, puis en les pondérant pour obtenir une représentation pondérée. Cette représentation pondérée est ensuite utilisée pour calculer les sorties de chaque couche.
+
+Les couches de transformation positionnelle sont utilisées pour encoder l'information sur l'ordre séquentiel des éléments. Elles ajoutent des informations sur la position relative des éléments, permettant ainsi aux transformers de prendre en compte l'ordre séquentiel lors de la génération des prédictions. Cela est particulièrement important dans les tâches de génération de séquences où l'ordre des symboles est essentiel.
+
+Les couches de feed-forward sont des couches entièrement connectées qui introduisent de la non-linéarité dans le modèle. Elles permettent de transformer les représentations des éléments en utilisant des opérations linéaires suivies d'une fonction d'activation. Ces transformations non linéaires aident à capturer des relations complexes et à améliorer la capacité de modélisation des transformers.
+
+Les transformers utilisent également des mécanismes de "masking" pour s'assurer que les prédictions ne dépendent que des éléments précédents de la séquence de sortie lors de la génération de chaque élément. Cela permet d'éviter toute dépendance vis-à-vis des éléments futurs, ce qui est essentiel pour les tâches de prédiction et de génération séquentielles.
+
+Dans les architectures des transformers, l'information se propage de manière parallèle plutôt que séquentielle. Chaque couche traite l'ensemble de la séquence en parallèle, ce qui permet d'exploiter efficacement les capacités de calcul parallèle des processeurs modernes et d'accélérer l'entraînement et l'inférence.
+
+L'architecture des transformers peut être étendue pour inclure des variantes telles que les transformers à plusieurs têtes. Les transformers à plusieurs têtes permettent de calculer différentes pondérations d'attention pour différentes parties de l'entrée, ce qui permet au modèle de mettre l'accent sur différentes relations et caractéristiques. Cela améliore la capacité du modèle à capturer des informations spécifiques et à modéliser des tâches complexes.
+
+Dans la section suivante, nous allons mettre en lumière les utilisations de transformers les plus populaires.
+
+4. Applications des Transformers :
+
+Les transformers ont été largement utilisés dans divers domaines pour des tâches de modélisation de séquences. Leur capacité à capturer les dépendances à longue distance et à générer des prédictions précises en fait une architecture polyvalente et performante. Voici quelques-unes des applications les plus courantes des transformers :
+
+1. La traduction automatique : Les transformers ont révolutionné le domaine de la traduction automatique en offrant des performances significativement meilleures par rapport aux approches précédentes. Grâce à leur capacité à modéliser les relations contextuelles à travers toute la séquence, les transformers sont capables de capturer les subtilités du langage et de produire des traductions plus précises et naturelles.
+
+2. Résumé automatique : Les transformers sont également utilisés pour générer des résumés automatiques de textes. En modélisant les relations entre les phrases et en identifiant les informations clés, les transformers sont capables de condenser de longs textes en résumés concis et clairs.
+
+3. Recherche d'informations : Les transformers sont employés dans les moteurs de recherche pour améliorer la pertinence des résultats. En analysant les requêtes des utilisateurs et en évaluant la similarité avec les documents, les transformers peuvent effectuer une recherche plus précise et fournir des résultats mieux adaptés.
+
+4. Chatbots et assistants virtuels : Les transformers sont utilisés pour créer des chatbots et des assistants virtuels capables d'interagir avec les utilisateurs de manière naturelle et fluide. Grâce à leur capacité à comprendre et à générer du langage, les transformers permettent des conversations plus naturelles et plus efficaces.
+
+5. Reconnaissance automatique de la parole : Les transformers ont également été appliqués avec succès dans la reconnaissance automatique de la parole. En modélisant les séquences audio et en capturant les relations temporelles, les transformers peuvent convertir des enregistrements audio en texte avec une grande précision.
+
+6. Traitement du langage naturel : Les transformers sont utilisés pour diverses tâches de traitement du langage naturel telles que la classification de texte, la génération de texte, la réponse aux questions, la détection d'entités nommées, etc. Leur capacité à capturer les dépendances contextuelles leur permet de comprendre et de générer du langage de manière plus précise. Actuellement, les transformers sont la méthode la plus performante pour la plupart des tâches de traitement du langage naturel.
+
+7. Vision par ordinateur : Les transformers ont également été adaptés au domaine de la vision par ordinateur, où ils ont montré des résultats prometteurs. En utilisant des architectures basées sur les transformers, il est possible de capturer les relations spatiales entre les éléments d'une image ou d'une vidéo, permettant ainsi des tâches telles que la classification d'images, la détection d'objets et la segmentation sémantique.
+
+On remarque à travers ces exemples que les transformers ont été utilisés avec succès dans de nombreux domaines pour des tâches de modélisation de séquences. Leur capacité à capturer les dépendances à longue distance et à générer des prédictions précises en fait une architecture puissante et polyvalente. Les transformers continuent d'ouvrir de nouvelles perspectives et d'améliorer les performances dans diverses applications.
+
+5. Avancées récentes et défis
+
+Récemment, les transformers ont connu de nombreuses avancées qui ont contribué à améliorer leurs performances et à étendre leur utilisation. Voici quelques-unes des avancées les plus caractéristiques :
+
+- Améliorations de l'attention : Les mécanismes d'attention ont été améliorés pour prendre en compte des aspects tels que l'attention contextuelle et l'attention multi-modale. Ces améliorations permettent aux transformers de mieux modéliser les relations complexes entre les éléments de séquence et d'intégrer des informations provenant de différents domaines, comme le langage et la vision.
+
+- Adaptation aux domaines spécifiques : Les transformers ont été adaptés à des domaines spécifiques en utilisant des techniques telles que le finetuning. Cela permet d'ajuster un modèle pré-entraîné sur des données étiquetées spécifiques à une tâche donnée. Cette approche a permis d'obtenir de bonnes performances même avec des ensembles de données plus petits et spécifiques à un domaine. Cela a également permis de rendre les transformers plus accessibles aux utilisateurs non experts.
+
+Parmi les défis actuels des transformers, on peut citer :
+
+- Gestion de la complexité computationnelle : A l'ère du réchauffement climatique, il est de plus en plus mal vu d'utiliser des technologies qui demandent autant de ressources. Les transformers, en particulier les modèles de grande échelle, nécessitent d'importantes ressources computationnelles pour l'entraînement et l'inférence. Réduire la complexité et améliorer l'efficacité des modèles sans compromettre les performances reste un défi à relever.
+
+- Interprétabilité : Les transformers sont souvent considérés comme des "boîtes noires" en raison de leur complexité. Comprendre et interpréter les décisions prises par les transformers reste un défi important. Comprendre comment les modèles prennent leurs décisions et quelles sont les informations prises en compte est crucial, en particulier pour les applications critiques telles que la santé et la sécurité. Les chercheurs travaillent sur des méthodes d'interprétabilité pour mieux comprendre comment les informations sont traitées et utilisées dans les différentes couches des transformers.
+
+6. Conclusion
+
+En conclusion, les transformers ont révolutionné le domaine de l'intelligence artificielle, du domaine de la NLP, et ont ouvert de nouvelles perspectives dans le traitement de séquences. Leur architecture basée sur l'attention leur confère une capacité unique à capturer les dépendances à longue distance, ce qui les rend particulièrement adaptés pour modéliser des données séquentielles complexes. Les transformers ont été largement utilsés dans des domaines tels que la traduction automatique, le résumé de texte, la vision par ordinateur et bien d'autres.
+
+Au fil des années, les transformers ont connu des améliorations significatives, avec des modèles de plus en plus grands et des avancées dans l'efficacité de l'attention. Cependant, des défis subsistent, notamment en termes d'explicabilité et d'interprétabilité des prédictions, ainsi que de gestion des ressources nécessaires pour entraîner et déployer des modèles de grande échelle.
+
+Malgré ces défis, les transformers continuent de repousser les limites de l'intelligence artificielle et d'améliorer les performances dans de nombreux domaines. Leur capacité à modéliser les dépendances complexes des séquences en fait une architecture puissante et désormais incontournable. 
 
 # III. DISHDECODER
 
@@ -119,7 +226,7 @@ INSERER ICI L'ETAT DE L'ART
 
 ### 3.1.1 Le choix du modèle
 
-Comme nous l'avons vu précédemment, il existe à l'heure actuelle de très nombreux modèles pour réaliser de l'OCR (Optical Character Recognition).
+Il existe à l'heure actuelle de très nombreux modèles pour réaliser de l'OCR (Optical Character Recognition).
 
 Lors de mon alternance j'ai été en charge de la réalisation d'un modèle d'OCR pour une application de lecture de documents. J'ai donc eu l'occasion de tester plusieurs modèles d'OCR et de voir leurs avantages et leurs inconvénients. Parmi les modèles que j'ai testé, il y avait Tesseract, EasyOCR, TROCR et PaddleOCR. 
 
@@ -266,15 +373,8 @@ INSERER ICI UNE IMAGE DU HUB HUGGING FACE AVEC LE MODELE DANS LE REPOSITORY
 
 ### 3.2.1 Le choix des modèles
 
-Comme pour l'OCR, une multitude de modèles de traduction existe. Depuis quelques années, les entreprises utilisent de plus en plus les modèles de traduction neuronaux. Ces modèles sont des modèles de traduction automatique qui utilisent des réseaux de neurones artificiels. Ils sont capables de traduire des textes d'une langue à une autre en s'appuyant d'avantage sur le contexte. Parmi ces architectures, on retrouve notamment les RNN et les LSTM.
-Les réseaux de neurones récurrents (RNN) sont des modèles conçus pour traiter des séquences de texte en entrée et/ou générer des séquences de texte en sortie. Leur caractéristique principale est leur capacité à conserver une forme de mémoire grâce à des boucles récurrentes au sein de leurs couches cachées. Cela permet à l'information contextuelle de circuler à travers le réseau, de sorte que les sorties précédentes puissent influencer les calculs effectués à chaque étape temporelle.
+C'est en raison des résultats évoqués dans l'état de l'art de ce projet que j'ai décidé d'utiliser des modèles de traduction neuronaux basés sur les Transformers. Afin de choisir quels modèles j'allais utiliser et finetuner, j'ai été lire le cours sur la traduction de Hugging Face. Plusieurs modèles étaient proposés, comme par exemple T5, MarianMT, Bart...
 
-Cette capacité à mémoriser les informations contextuelles est similaire à notre façon de lire. Lorsque nous lisons, nous retenons les éléments importants des mots et des phrases précédentes pour les utiliser comme référence et comprendre le sens des nouveaux mots et des nouvelles phrases.
-Les LSTM (Long Short-Term Memory) sont une variante des RNN. En effet, bien que les RNN soient capables de conserver des informations sur de courtes périodes de temps, ils ont du mal à conserver des informations sur de longues périodes de temps. C'est ce que l'on appelle le problème de la disparition du gradient. Les LSTM peuvent donc être considérés comme des RNN améliorés. Les LSTM sont composés de trois portes : la porte d'oubli, la porte d'entrée et la porte de sortie. La porte d'oubli permet de décider quelles informations doivent être oubliées ou conservées. La porte d'entrée permet de décider quelles nouvelles informations doivent être stockées dans la cellule d'état. Enfin, la porte de sortie permet de décider quelles informations doivent être renvoyées en sortie. Ainsi, grâce à leur structure spécifique, les LSTM sont capables de capturer et de retenir des informations pertinentes sur une longue séquence, permettant ainsi de conserver la relation entre les mots à travers différentes parties de la séquence. Ils sont donc particulièrement adaptés à la traduction de textes longs. 
-
-Cependant, une révolution majeure dans le domaine de la traduction automatique est survenue avec l'avènement des Transformers. Contrairement aux LSTM, qui sont basés sur des architectures récurrentes, les Transformers utilisent une approche basée sur l'attention pour capturer les relations entre les mots. Cette architecture révolutionnaire a permis de surmonter les limitations des LSTM en termes de gestion des dépendances à long terme et de parallélisme. Les Transformers se sont imposés comme une avancée majeure dans la traduction automatique en raison de leur capacité à traiter efficacement les séquences de texte et à capturer les dépendances contextuelles sur de plus longues distances. Grâce à leur mécanisme d'attention, les Transformers peuvent attribuer des poids différents aux mots en fonction de leur importance, ce qui leur permet de comprendre le contexte global de la phrase et d'effectuer des traductions plus précises et cohérentes.
-
-C'est pourquoi, j'ai donc décidé d'utiliser des modèles de traduction neuronaux basés sur les Transformers. Afin de choisir quels modèles j'allais utiliser et finetuner, j'ai été lire le cours sur la traduction de Hugging Face. Plusieurs modèles étaient proposés, comme par exemple T5, MarianMT, Bart...
 T5 (Text-To-Text Transfer Transformer) est un modèle de traitement du langage naturel développé par Google. Il s'agit d'un modèle basé sur les Transformers qui peut être utilisé pour diverses tâches, dont la traduction. 
 Bart (Bidirectional and AutoRegressive Transformers") est un modèle développé par Facebook AI. Il est lui aussi basé sur les Transformers et a été spécifiquement conçu pour la génération de texte. 
 MarianMT est un projet open-source qui se concentre sur la traduction automatique neuronale. Il s'agit d'une implémentation basées sur les Transformers. MarianMT utilise le même modèle de base que Bart avec quelques modifications.
