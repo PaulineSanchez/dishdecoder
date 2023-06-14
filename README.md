@@ -287,12 +287,17 @@ Souhaitant utiliser des modèles spécialisés dans les tâches de traduction ne
 
 Souhait faire de la traduction de l'anglais vers le français et du français vers l'anglais, j'ai choisi de finetuner les deux modèles suivants :
 `Helsinki-NLP/opus-mt-fr-en` pour la traduction du français vers l'anglais, et `Helsinki-NLP/opus-mt-en-fr` pour la traduction de l'anglais vers le français.
-Pour finetuner ces modèles, j'allais avoir besoin d'un dataset contenant des phrases en anglais et leur traduction en français. Afin d'obtenir de bonnes performances, il fallait que ce dataset soit composé de phrases plus ou moins longues et de phrases plus ou moins complexes. De plus, le but de ce finetuning était pour moi d'obtenir des modèles spécialisés dans la thématique de la cuisine. Il fallait donc que le dataset contienne des phrases en lien avec la cuisine. Par ailleurs, plus le dataset allait être volumineux, plus les performances des modèles allaient être bonnes.
+Pour finetuner ces modèles, j'allais avoir besoin d'un dataset contenant des phrases en anglais et leur traduction en français. Afin d'obtenir de bonnes performances, il fallait que ce dataset soit composé de phrases plus ou moins longues et de phrases plus ou moins complexes. De plus, le but de ce finetuning était pour moi d'obtenir des modèles spécialisés dans la thématique de la cuisine. Il fallait donc que le dataset contienne des phrases en lien avec la cuisine. Ces phrases devaient contenir des verbes d'action propres à la cuisine et à la réalisation de recettes, des noms d'ingrédients, des noms de plats, des noms d'ustensiles... Par ailleurs, plus le dataset allait être volumineux, plus les performances des modèles allaient être bonnes.
+
+
+### 3.2.3 La création du dataset
+
+De nombreux datasets de traduction sont disponibles sur les sites de Kaggle ou même d'Hugging Face. Cependant, aucun ne correspondait à mon thème, qui était la cuisine, dans les deux langues choisies, le français et l'anglais. Comme pour le finetuning d'OCR, j'ai donc décidé de créer mon propre dataset. Pour cela, j'ai utilisé plusieurs sites de cuisine : marmiton.org, allrecipes.com, simplyrecipes.com, mercotte.fr et quelques autres. 
+A chaque fois, je selectionnais une ou plusieurs phrases qui me semblaient intéressantes, je les copiais, les collais dans la zone de texte du site deepl.com et je les traduisais dans la langue cible. Ayant des connaissances dans la traduction en anglais, je pouvais dans un second temps faire les modifictions nécessaires afin d'obtenir une traduction de qualité. Il ne me restait plus qu'à copier les phrases en anglais et leur traduction en français, et inversement, dans mon fichier CSV.
+J'ai utilisé deepl.com car il s'agit d'un site de traduction qui utilise des modèles neuronaux et qui est donc plus performant que Google Traduction par exemple. 
 
 Afin de pouvoir finetuner mes modèles, le moyen le plus efficace était de créer des datasets avec la librairie Datasets de Hugging Face. Cette librairie permet de créer des datasets à partir de fichiers JSON, CSV, TXT, XML, etc. 
 Il fallait donc dans un premier temps que je crée un fichier CSV avec les données sur lesquelles je souhaitais finetuner mon modèle.
 Le CSV devait avoir une colonne `id` qui s'incrémente à chaque nouvelle entrée et une colonne `translation` qui contient la phrase en anglais et sa traduction en français.
 J'ai donc crée un CSV avec ces caractéristiques et il ne me restait plus qu'à le remplir avec les données que je souhaitais. 
-
-### 3.2.3 La création du dataset
-
+Au final, mon fichier CSV était constitué de 400 entrées. 
