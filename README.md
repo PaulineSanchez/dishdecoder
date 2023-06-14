@@ -300,4 +300,25 @@ Afin de pouvoir finetuner mes modèles, le moyen le plus efficace était de cré
 Il fallait donc dans un premier temps que je crée un fichier CSV avec les données sur lesquelles je souhaitais finetuner mon modèle.
 Le CSV devait avoir une colonne `id` qui s'incrémente à chaque nouvelle entrée et une colonne `translation` qui contient la phrase en anglais et sa traduction en français.
 J'ai donc crée un CSV avec ces caractéristiques et il ne me restait plus qu'à le remplir avec les données que je souhaitais. 
-Au final, mon fichier CSV était constitué de 400 entrées. 
+Au final, mon fichier CSV était constitué de 399 entrées. 
+
+### 3.2.4 Le prétraitement des données
+
+Avant de transformer mon fichier CSV en Dataset Hugging Face, je n'ai pas fait de data augmentation. J'ai estimé que les données que j'avais sélectionnées étaient suffisantes pour finetuner mes modèles. 
+J'ai donc utilisé la librairie Datasets de Hugging Face pour transformer mon fichier CSV en Dataset Hugging Face. Lors de l'exécution du script, j'ai pris soin de préciser que la colonne `translation` était une colonne de type `Translation` afin que le Dataset Hugging Face soit bien un dataset de traduction.
+
+INSERER ICI LE CODE POUR TRANSFORMER LE CSV EN DATASET HUGGING FACE
+
+J'ai ensuite envoyé mon dataset sur le Hub de Hugging Face où il a été stocké à l'adresse suivante `https://huggingface.co/datasets/PaulineSanchez/recipes_translation_4_helsinki_4.0`.
+
+Après cela, et après avoir vérifié que mon dataset était correct et bien disponible sur le Hub de Hugging Face, je l'ai téléchargé, et toujours avec la librairie Datasets de Hugging Face, j'ai divisé mon dataset en deux datasets : un dataset d'entraînement et un dataset de validation. J'ai choisi de diviser mon dataset de la manière suivante, 80% des données pour l'entraînement et 20% pour la validation. Cela donnait un dataset d'entraînement de 319 entrées et un dataset de validation de 80 entrées.
+
+INSERER ICI LE CODE POUR DIVISER LE DATASET EN DATASET D'ENTRAINEMENT ET DATASET DE VALIDATION
+
+### 3.2.5 Le stockage du dataset
+
+Comme pour le dataset avant la séparation en jeu d'entraînement et en jeu de validation, j'ai envoyé mon dataset sur le Hub de Hugging Face grâce à la fonction `push_to_hub` de Hugging Face. Mon dataset a été stocké à l'adresse suivante `https://huggingface.co/datasets/PaulineSanchez/recipes_translation_400`. Ce dataset en affiché en mode public afin que tout le monde puisse y avoir accès et l'utiliser.
+
+INSERER ICI LE CODE POUR ENVOYER LE DATASET SUR LE HUB DE HUGGING FACE + FLOUTER LE TOKEN
+INSERER ICI UNE CAPTURE D'ECRAN DU DATASET SUR LE HUB DE HUGGING FACE
+
