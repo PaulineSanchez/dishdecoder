@@ -322,3 +322,37 @@ Comme pour le dataset avant la séparation en jeu d'entraînement et en jeu de v
 INSERER ICI LE CODE POUR ENVOYER LE DATASET SUR LE HUB DE HUGGING FACE + FLOUTER LE TOKEN
 INSERER ICI UNE CAPTURE D'ECRAN DU DATASET SUR LE HUB DE HUGGING FACE
 
+### 3.2.6 L'entraînement des modèles
+
+Pour entraîner mes modèles, j'ai utilisé un script que j'ai trouvé sur le Github de Hugging Face, dans le repository `transformers/examples/pytorch/translation`. Ce script permet d'entraîner un modèle de traduction, selon si son architecure est basée sur les transformers, à partir d'un dataset Hugging Face ou de fichiers json/CSV. J'ai donc utilisé ce script pour entraîner mes deux modèles de traduction.
+Afin de pouvoir utilisé ce script, j'ai dû cloner le repository `transformers` de Hugging Face sur mon ordinateur. 
+Après cela, après m'être déplacé dans le dossier, j'ai lancé la commande suivante :
+
+```$ python examples/pytorch/translation/run_translation.py     --model_name_or_path Helsinki-NLP/opus-mt-en-fr     --do_train     --do_eval     --source_lang en     --target_lang fr     --dataset_name PaulineSanchez/recipes_translation_400  --output_dir /home/pauline/Documents/PCO/Modele_Traduction/train_hf_new_batch_4_epoch_6     --per_device_train_batch_size=6     --per_device_eval_batch_size=6     --predict_with_generate --report_to wandb --num_train_epochs 6 ```
+
+Cette commande permet de lancer l'entraînement du modèle de traduction. Elle prend en paramètre le nom du modèle à utiliser, le code de la langue source, le code de la langue cible, le nom du dataset à utiliser, le chemin vers le dossier où stocker les résultats de l'entraînement, la taille du batch d'entraînement, la taille du batch de validation, le nom de l'outil utilisé pour faire du monitoring et le nombre d'epochs à effectuer. 
+
+J'ai donc lancé cette commande plusieurs fois, en inversant les langues source et cible et en précisant le nom du modèle à utiliser. J'ai également changé le nom du dossier où stocker les résultats de l'entraînement afin de pouvoir les différencier.
+
+### 3.2.7 Configuration des hyperparamètres des modèles
+
+Lors des différents entraînements que j'ai lancé, les hyperparamètres que j'ai modifiés sont les suivants :
+- le batch size : j'ai fait des tests avec des batch allant de 2 à 16
+- le nombre d'epochs : j'ai fait des tests avec des epochs allant de 3 à 75
+
+En fonction des résultats que j'obtenais et des courbes dessinées sur Weight and Biases, j'ai pu ajuster les hyperparamètres au fur et à mesure afin d'obtenir les meilleurs modèles possibles.
+
+AJOUTER CAPTURE D'ECRAN DES COURBES DE W&B
+
+### 3.2.8 Comparaison des modèles et choix des meilleurs
+
+La métrique utilisée par Hugging Face pour comparer les modèles de traduction est le score BLEU (bilingual evaluation understudy). Le BLEU score est une métrique qui permet de comparer la qualité d'une traduction automatique à une ou plusieurs traductions de référence. Il évalue la similarité entre les n-grammes (séquences de n mots consécutifs) présents dans la sortie générée et ceux présents dans les références. Le score est compris entre 0 et 1. Plus le score est proche de 1, plus la traduction est de bonne qualité. Cependant, le score BLEU présente également certaines limites. Par exemple, il ne tient pas compte de la sémantique ou de la cohérence globale du texte, ce qui signifie qu'un score élevé ne garantit pas nécessairement une traduction ou un résumé de haute qualité sur tous les aspects.
+
+Ainsi, afin de pouvoir comparer les différents modèles entraînés, j'ai là aussi utilisé Weight and Biases. 
+J'ai classé mes modèles selon leur score BLEU et j'ai pu ainsi déterminer les meilleurs modèles.
+
+INSERER ICI CAPTURE D'ECRAN DES MODELES ET DE LEUR SCORE BLEU
+
+Ainsi, pour le modèle de traduction anglais-français, le meilleur modèle est celui entraîné avec un batch size de 8 et 3 epochs. Pour le modèle de traduction français-anglais, le meilleur modèle est celui entraîné avec un batch size de 12 et 4 epochs.
+
+
