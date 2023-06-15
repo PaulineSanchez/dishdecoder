@@ -14,6 +14,13 @@ I. Introduction
     1.5 Schéma de l’application
 
 II. ETAT DE L’ART
+    Introduction
+    1. Contexte historique
+    2. Les fondamentaux des Transformers
+    3. Architecture des Transformers
+    4. Domaines d'applications des Transformers
+    5. Avancées récentes et défis
+    Conclusion
 
 III. DISHDECODER
 
@@ -178,7 +185,7 @@ L'architecture des transformers peut être étendue pour inclure des variantes t
 
 Dans la section suivante, nous allons mettre en lumière les utilisations de transformers les plus populaires.
 
-4. Applications des Transformers :
+4. Domaines d'application des Transformers :
 
 Les transformers ont été largement utilisés dans divers domaines pour des tâches de modélisation de séquences. Leur capacité à capturer les dépendances à longue distance et à générer des prédictions précises en fait une architecture polyvalente et performante. Voici quelques-unes des applications les plus courantes des transformers :
 
@@ -361,6 +368,33 @@ Le modèle est alors composé de trois nouveaux fichiers : inference.pdiparams, 
 Afin de facilité l'utilisation du nouveau modèle, je crée un dossier ocr_model et j'ai ajouté dans ce dossier les trois fichiers d'inférence convertis, le fichier de configuration du modèle en .yml ainsi que le dictionnaire utilisé en .txt.
 
 INSERER ICI UNE IMAGE DU DOSSIER OCR_MODEL
+
+Afin de vérifier les performances du nouveau modèle, j'ai écrit un script Python permettant de comparer, EasyOCR, PaddleOCR avant le finetuning, et mon modèle PaddleOCR après le finetuning.
+
+Pour mesurer les performances des OCR, j’ai choisi de calculer les distances de Levenshtein et d’Indel.
+La distance de Levenshtein est une mesure de similitude entre deux chaînes de caractères, définie comme le nombre minimum d'éditions de caractères simples (insertions, suppressions ou substitutions) nécessaires pour transformer une chaîne en l'autre. Plus la distance est proche de 0,
+plus les deux textes sont similaires.
+La distance Indel est une variation de la distance de Levenshtein qui prend en compte uniquement les insertions et les suppressions, et pas les substitutions. C'est également une mesure de la dissimilarité entre deux chaînes de caractères. Pour Indel, plus la distance est proche de 100, plus
+les deux textes sont similaires.
+
+Pour pouvoir comparer les OCR, j’ai constitué un nouveau jeu de données de 10 images.
+
+
+INSERER IMAGES DU DATASET DE TEST
+
+Les résultats de la comparaison furent les suivants :
+- pour la distance d’Indel (meilleur résultat = proche de 100) : EasyOCR: 89.53, PaddleOCR_base : 91.76, PaddleOCR_finetuné : 93.28 .
+- pour la distance de Levenshtein (meilleur résultat = proche de 0) : EasyOCR: 3.7, PaddleOCR_base: 3.0, PaddleOCR_finetuné : 2.2 .
+
+INSERER IMAGE AVEC LES RESULTATS    
+
+On peut donc en conclure que peu importe la méthode de calcul le classement est le suivant :
+ 1ère place PaddleOCR nouveau modèle finetuné
+ 2nde place PaddleOCR modèle de base
+ 3ème place EasyOCR 
+
+Grâce à cela, on peut en déduire que le finetuning a permis d’améliorer la précision du modèle. Le nouveau modèle finetuné est donc l’OCR le plus performant parmi ceux testés.
+
 
 ### 3.1.9 Le stockage du modèle
 
