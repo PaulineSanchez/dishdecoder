@@ -487,6 +487,18 @@ INSERER ICI CAPTURE D'ECRAN DES MODELES ET DE LEUR SCORE BLEU
 
 Ainsi, pour le modèle de traduction anglais-français, le meilleur modèle est celui entraîné avec un batch size de 8 et 3 epochs. Pour le modèle de traduction français-anglais, le meilleur modèle est celui entraîné avec un batch size de 12 et 4 epochs.
 
+Dans le but de vérifier si mes modèle fonctionnaient réellement, j'ai écrit un script Python me permettant de comparer sur une phrase donnée, le modèle de base et le modèle finetuné.
+Le résultats donnés sont subjectifs et sujets à interprétations car ils dépendent de la manière dont on traduirait les phrases. Cependant, cela permet de voir que les modèles fonctionnent bien.
+
+Par ailleurs, on remarque que pour les modèles de traduction de l'anglais vers le français, le modèle de base avait tendance à ne pas traduire le texte entier, une partie, à la fin, était souvent omise. Ce problème est résolu avec le modèle finetuné.
+
+Concernant les modèles de traduction du français vers l'anglais, il n'y a pas beaucoup de différences hormis que le modèle finetuné a tendance à traduire de manière plus naturelle en utilisant des expressions plutôt qu'en faisant du mot à mot.
+
+INSERER ICI LES RESULTATS DU SCRIPT DE COMPARAISON DES MODELES
+
+INSERER ICI LES 4 exemples.
+
+
 ### 3.2.9 Le stockage des modèles
 
 Une fois que j'ai déterminé les meilleurs modèles, je les ai envoyé sur le Hub de Hugging Face afin de pouvoir les utiliser par la suite. J'ai utilisé la fonction `push_to_hub` de Hugging Face pour envoyer mes modèles sur le Hub. Il est a noté que la fonction `push_to_hub` utilise Git et Git LFS pour envoyer les modèles sur le Hub. Ainsi, peu importe la taille du modèle, il sera envoyé sur le Hub.
@@ -551,7 +563,7 @@ Le fichier alerting.pycontient une fonction send_discord_notification qui est ut
 
 ### 3.4.2 La schématisation de l'API
 
-INSERER ICI UN SCHEMA DE L'API
+mettre capture d'écran swagger + exemple de add_rating
 
 ### 3.4.3 La base de données relationnelle
 

@@ -4,6 +4,9 @@ from typing import List, Dict
 import pynecone as pc
 from .helpers import navbar_index
 from .helpers import navbar
+import requests
+import json
+from aiohttp import ClientSession
 
 docs_url = "https://pynecone.io/docs/getting-started/introduction"
 filename = f"{config.app_name}/{config.app_name}.py"
@@ -37,6 +40,7 @@ class State(pc.State):
     username: str = ""
     password: str = ""
     img: List[str]
+    translated_img: str = ""
 
     def set_username(self, username):
         self.username = username.strip()
@@ -73,6 +77,17 @@ class State(pc.State):
 
             # Update the img var.
             self.img.append(file.filename)
+
+    async def apitranslate(self):
+        async with ClientSession() as session:
+            async with session.post(
+                "http://localhost:7680/inference",
+                data={"source_lang": "en", "target_lang": "fr", "file": open(f".web/public/{self.img[0]}", "rb")}
+            ) as response:
+                data = await response.read()
+                self.translated_img = pc.Image(src=data)
+        
+
 
 
     # def clear_images(self):
@@ -226,7 +241,7 @@ def mlapp() -> pc.Component:
                 pc.spacer(),
                 pc.center(
                 pc.foreach(
-                    State.img, lambda img: pc.image(src=img, max_width="600px", max_height="600px")
+                    State.img, lambda img: pc.image(src=img, max_width="600px", max_height="500px")
                 ),
                 ),
                 row_span=2, col_span=1, padding="3em", justify_items="center"
@@ -243,11 +258,14 @@ def mlapp() -> pc.Component:
             ),
             pc.grid_item(
                 pc.vstack(
-                pc.center(
-                pc.badge("Third step", bg="RGB(244, 237, 228)", justify="center"),
-                ),
-                pc.button("Translate", width="100%", bg="RGB(227, 218, 231)", color="white", size="lg"),
-                row_span=2, col_span=1, padding="3em", justify_items="center"
+                    pc.center(
+                        pc.badge("Third step", bg="RGB(244, 237, 228)", justify="center"),
+                    ),
+                    pc.button(
+                        "Translate", on_click=lambda: State.apitranslate(), width="100%", bg="RGB(227, 218, 231)", color="white", size="lg"
+                    ),
+                    pc.Image(src=State.translated_img),
+                    row_span=2, col_span=1, padding="3em", justify_items="center"
                 ),
             ),
             template_rows="repeat(2, 1fr)",

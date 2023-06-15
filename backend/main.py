@@ -22,7 +22,7 @@ app = FastAPI()
 service = Service()
 
 
-@app.get("/")
+@app.get("/", tags=["status"])
 def root():
     return {"message": "Hello World"}
 
@@ -67,7 +67,7 @@ def inference(
             "translated_paragraph": translated_paragraph_json,
         }
 
-@app.post("/img2cloud", status_code=200, tags=["img2cloud"])
+@app.post("/img2cloud", status_code=200, tags=["database"])
 def img2cloud(
     file: UploadFile = File(...),
 ):
@@ -82,18 +82,8 @@ def img2cloud(
 
     return Response(result)
 
-@app.post("/get_users", status_code=200, tags=["get_users"])
-def get_users():
-    """
-    Get_users récupère la liste des utilisateurs.
-    """
-    with Session(engine) as session:
-        users = session.query(User).all()
-
-        return users
-    
-
-@app.post("/create_user", status_code=200, tags=["create_user"])
+  
+@app.post("/create_user", status_code=200, tags=["users"])
 def create_user(
     username: str = Form(...),
     email: str = Form(...),
@@ -120,7 +110,7 @@ def create_user(
         return user
 
 
-@app.post("/check_user", status_code=200, tags=["check_user"])
+@app.post("/check_user", status_code=200, tags=["users"])
 def check_user(
     username: str = Form(...),
     password: str = Form(...),
@@ -144,7 +134,7 @@ def check_user(
         
 
 
-@app.post("/check_username", status_code=200, tags=["check_username"])
+@app.post("/check_username", status_code=200, tags=["users"])
 def check_username(
     username: str = Form(...),
 ):
@@ -163,7 +153,7 @@ def check_username(
             return {"result": False} # Nom d'utilisateur indisponible
         
 
-@app.post("/check_email", status_code=200, tags=["check_email"])
+@app.post("/check_email", status_code=200, tags=["users"])
 def check_email(
     email: str = Form(...),
 ):
@@ -177,7 +167,7 @@ def check_email(
         return {"result": False} # Adresse email invalide
 
 
-@app.post("/check_password", status_code=200, tags=["check_password"])
+@app.post("/check_password", status_code=200, tags=["users"])
 def check_password(
     password: str = Form(...),
 ):
@@ -191,7 +181,7 @@ def check_password(
         return {"result": False} # Mot de passe invalide
 
 
-@app.post("/get_user_id", status_code=200, tags=["get_user_id"])
+@app.post("/get_user_id", status_code=200, tags=["users"])
 def get_user_id(
     username: str = Form(...),
     password: str = Form(...),
@@ -210,7 +200,7 @@ def get_user_id(
 
       
 
-@app.post("/add_to_links", status_code=200, tags=["add_to_links"])
+@app.post("/add_to_links", status_code=200, tags=["database"])
 def add_to_links(
     url: str = Form(...),
     description: str = Form(...),
@@ -231,7 +221,7 @@ def add_to_links(
 
         return link
     
-@app.post("/get_links", status_code=200, tags=["get_links"])
+@app.post("/get_links", status_code=200, tags=["database"])
 def get_links(
     user_id: int = Form(...),
 ):
@@ -248,7 +238,7 @@ def get_links(
 
         return links
 
-@app.post("/add_rating", status_code=200, tags=["add_rating"])
+@app.post("/add_rating", status_code=200, tags=["database"])
 def add_rating(
     user_id: int = Form(...),
     user_rating: int = Form(...),
@@ -273,7 +263,7 @@ def add_rating(
 
         return rating
         
-@app.post("/get_data", status_code=200, tags=["get_data"])
+@app.post("/get_data", status_code=200, tags=["database"])
 def get_data():
      
      """
