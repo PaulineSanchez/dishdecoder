@@ -185,7 +185,7 @@ with tab_history:
             {
                 "url": [st.session_state["history"][i]["URL"] for i in range(len(st.session_state["history"]))],
                 "description": [st.session_state["history"][i]["Describe"] for i in range(len(st.session_state["history"]))],
-                "timestamp" : [st.session_state["history"][i]["Timestamp"] for i in range(len(st.session_state["history"]))]
+                "timestamp": [st.session_state["history"][i]["Timestamp"] for i in range(len(st.session_state["history"]))],
             }
         )
         st.dataframe(
@@ -205,9 +205,8 @@ with tab_history:
                         width="medium",
                         help="📢 Here is the description of what you saved"
                     ),
-                    "timestamp": st.column_config.DatetimeColumn(
+                    "timestamp": st.column_config.TextColumn(
                         "📅	Date",
-                        format="D MMM YYYY, h:mm a",
                         width="medium",
                         help="📢 Here is the day you saved your masterpiece"
                     ),
@@ -301,12 +300,14 @@ with tab_decode:
                 elif r.status_code == 404:
                     st.error("No text was found in the image")
                     message = f"Aucun texte n'a été trouvé dans l'image pour l'utilisateur : {st.session_state['username']}"
-                    send_discord_notification(message)   
+                    send_discord_notification(message)
+                    st.session_state["ocr_and_translation_response"] = None   
 
                 else:
                     st.error("An error occured during the OCR and translation process")
                     message = f"Une erreur est survenue lors de la phase d'ocr et de traduction pour l'utilisateur : {st.session_state['username']}"
                     send_discord_notification(message)
+                    st.session_state["ocr_and_translation_response"] = None
             else:
                 st.warning("Please crop the image before OCR and translation.")
 
@@ -352,6 +353,7 @@ with tab_decode:
 if st.button("Go back to home page") or not st.session_state["logged_in"]:
     st.session_state["user_id"] = None
     st.session_state["history"] = []
+    st.session_state["ocr_and_translation_response"] = None
     switch_page("dishdecoder_app")
 
 

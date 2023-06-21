@@ -89,8 +89,9 @@ class Service:
             # ocr_bbox = [line[0] for line in ocr_results]
             # translated_texts = self.do_translation(ocr_texts, source_lang, target_lang)
             translated_paragraph = self.do_translation(corrected_sentences_splitted, source_lang, target_lang)
+            print("****translated_paragraph****")
             print(translated_paragraph)
-            print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
+            print("****translated_paragraph****")
             
             post_processed_image = self.do_post_processing_for_paragraphs(translated_paragraph)
 
@@ -158,7 +159,9 @@ class Service:
         """
 
         liste_filtree = [element for element in ocr_texts if len(element)>10 ]
+        print("**************liste_filtree*************")
         print(liste_filtree)
+        print("**************liste_filtree*************")
 
         if source_lang == "en":
             translated_texts = self.en_to_fr(liste_filtree)

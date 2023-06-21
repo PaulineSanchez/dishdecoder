@@ -6,7 +6,7 @@ from paddleocr import PaddleOCR
 from PIL import Image, ImageDraw, ImageFont
 from transformers import pipeline
 
-from config import settings
+from backend.config import settings
 
 class Service:
     def __init__(self) -> None:

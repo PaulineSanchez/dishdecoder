@@ -45,12 +45,10 @@ def inference(
         file (UploadFile): Fichier image à traiter
     """
     image = Image.open(io.BytesIO(file.file.read()))
-    result, concatenated_ocr_texts, corrected_sentences, translated_paragraph = service.inference(image, source_lang, target_lang)
 
-    if result is None:
-        raise HTTPException(status_code=404, detail="The OCR wasn't able to detect any text in the image.")
-
-    else:
+    try: 
+        result, concatenated_ocr_texts, corrected_sentences, translated_paragraph = service.inference(image, source_lang, target_lang)
+      
         with io.BytesIO() as output:
             result.save(output, format="PNG")
             image_contents = output.getvalue() 
@@ -59,13 +57,18 @@ def inference(
             corrected_sentences_json = json.dumps(corrected_sentences)
             translated_paragraph_json = json.dumps(translated_paragraph)
 
-
         return {
             "image": base64.b64encode(image_contents).decode("utf-8"),
             "concatenated_ocr_texts": concatenated_ocr_texts_json,
             "corrected_sentences": corrected_sentences_json,
             "translated_paragraph": translated_paragraph_json,
         }
+    
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=404, detail="The OCR wasn't able to detect any text in the image.")
+    
+        
 
 @app.post("/img2cloud", status_code=200, tags=["database"])
 def img2cloud(

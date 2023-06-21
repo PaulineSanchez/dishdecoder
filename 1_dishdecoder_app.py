@@ -208,6 +208,8 @@ with col_buttons:
                     if username == "superadmin" and password == "superadmin":
                         st.session_state["logged_in"] = True
                         switch_page("admin")
+                    else:
+                        st.error("Nom d'utilisateur ou mot de passe incorrect")
                 else:
-                    st.error("Nom d'utilisateur ou mot de passe incorrect")
+                    st.error("Erreur lors du processus")
 
